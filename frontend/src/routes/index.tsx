@@ -9,7 +9,7 @@ function HomePage() {
   return (
     <div>
       <h1>Pair Scheduling</h1>
-      <p>Welcome to your MigraCode fullstack project!</p>
+      <p>Book a 1:1 session in a couple of clicks, no more hunting through links.</p>
       <p>
         Edit <code>src/routes/index.tsx</code> to change this page.
       </p>
