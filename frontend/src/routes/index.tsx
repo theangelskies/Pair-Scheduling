@@ -11,7 +11,7 @@ function HomePage() {
       <h1>Pair Scheduling</h1>
       <p>Book a 1:1 session in a couple of clicks, no more hunting through links.</p>
       <p>
-        Edit <code>src/routes/index.tsx</code> to change this page.
+        Browse available time slots, select a time that works for you, and get a confirmation email with the details.
       </p>
     </div>
   )
