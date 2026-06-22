@@ -8,7 +8,7 @@ export const Route = createFileRoute('/')({
 function HomePage() {
   return (
     <div>
-      <h1>🏠 Home</h1>
+      <h1>Pair Scheduling</h1>
       <p>Welcome to your MigraCode fullstack project!</p>
       <p>
         Edit <code>src/routes/index.tsx</code> to change this page.
