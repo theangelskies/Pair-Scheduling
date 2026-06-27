@@ -1,6 +1,7 @@
 import express from 'express'
 import { userRoutes } from './routes/users.js'
 import { pool } from './db/pool.js'
+import slotsRouter from './routes/slots.js'
 
 const app = express()
 const PORT: number = Number(process.env.PORT) || 3000
@@ -24,6 +25,8 @@ app.use('/api', (_req, res, next) => {
 // ── Routes ──────────────────────────────────────────────────────────────────
 // Mount route files here. Keep index.ts clean – one line per feature.
 app.use('/api/users', userRoutes)
+
+app.use('/api/slots', slotsRouter)
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })

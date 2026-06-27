@@ -10,8 +10,8 @@
     "lint": "oxlint src",
     "format": "oxfmt",
     "typecheck": "tsc --noEmit",
-    "migrate": "dotenv -e .env -- node-pg-migrate up -m migrations",
-    "migrate:down": "dotenv -e .env -- node-pg-migrate down -m migrations",
+    "migrate": "dotenv -- node-pg-migrate up -m migrations",
+    "migrate:down": "dotenv -- node-pg-migrate down -m migrations",
     "migrate:create": "node-pg-migrate create -m migrations",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -20,7 +20,7 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "node-pg-migrate": "^8.0.4",
-    "pg": "^8.21.0"
+    "pg": "^8.22.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
