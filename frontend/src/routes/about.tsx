@@ -10,7 +10,8 @@ function AboutPage() {
     <div>
       <h1>ℹ️ About</h1>
       <p>
-        This project was scaffolded with <strong>create-migracode-app</strong>.
+        This is a simple fullstack project built to schedule 1:1 sessions with volunteers or
+        trainees.
       </p>
     </div>
   )
