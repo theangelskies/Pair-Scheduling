@@ -15,6 +15,7 @@ router.get('/available', async (req, res) => {
     );
     res.json(result.rows);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Database fetch failed' });
   }
 });
@@ -30,6 +31,7 @@ router.post('/', async (req, res) => {
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Failed to save slot' });
   }
 });
