@@ -13,6 +13,7 @@
     "migrate": "dotenv -- node-pg-migrate up -m migrations",
     "migrate:down": "dotenv -- node-pg-migrate down -m migrations",
     "migrate:create": "node-pg-migrate create -m migrations",
+    "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
