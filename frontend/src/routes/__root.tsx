@@ -1,5 +1,4 @@
 import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 import styles from './__root.module.css'
 
 // __root.tsx is the layout that wraps ALL pages.
@@ -49,9 +48,6 @@ function RootLayout() {
       <main className={styles.main}>
         <Outlet />
       </main>
-
-      {/* Remove TanStackRouterDevtools in production */}
-      <TanStackRouterDevtools />
     </>
   )
 }
