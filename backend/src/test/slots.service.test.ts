@@ -46,4 +46,43 @@ describe('slots service', () => {
 
     await expect(getAvailableSlots()).rejects.toThrow('connection lost')
   })
+
+  it('getAvailableSlots returns all slots when multiple exist', async () => {
+    const multipleRows = [
+      { ...MOCK_ROWS[0], id: 1 },
+      { ...MOCK_ROWS[0], id: 2, volunteer_name: 'Bob Mwangi' },
+      { ...MOCK_ROWS[0], id: 3, volunteer_name: 'Carmen Liu' },
+    ]
+    pool.query.mockResolvedValueOnce({ rows: multipleRows })
+
+    const slots = await getAvailableSlots()
+
+    expect(slots).toHaveLength(3)
+    expect(slots[2].volunteer_name).toBe('Carmen Liu')
+  })
+
+  it('getAvailableSlots returns all expected fields on each slot', async () => {
+    pool.query.mockResolvedValueOnce({ rows: MOCK_ROWS })
+
+    const [slot] = await getAvailableSlots()
+
+    expect(slot).toMatchObject({
+      id: expect.any(Number),
+      volunteer_id: expect.any(Number),
+      volunteer_name: expect.any(String),
+      start_time: expect.any(String),
+      end_time: expect.any(String),
+      is_recurring: expect.any(Boolean),
+      minimum_notice_hours: expect.any(Number),
+      status: expect.any(String),
+    })
+  })
+
+  it('getAvailableSlots queries the database exactly once', async () => {
+    pool.query.mockResolvedValueOnce({ rows: MOCK_ROWS })
+
+    await getAvailableSlots()
+
+    expect(pool.query).toHaveBeenCalledTimes(1)
+  })
 })

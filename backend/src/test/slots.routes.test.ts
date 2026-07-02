@@ -80,4 +80,29 @@ describe('GET /api/slots/available', () => {
     expect(res.status).toBe(500)
     expect(res.body).toEqual({ error: 'Database fetch failed' })
   })
+
+  it('responds with JSON content type', async () => {
+    vi.mocked(getAvailableSlots).mockResolvedValueOnce([])
+
+    const res = await request(app).get('/api/slots/available')
+
+    expect(res.headers['content-type']).toMatch(/application\/json/)
+  })
+
+  it('preserves slot order returned by the service', async () => {
+    vi.mocked(getAvailableSlots).mockResolvedValueOnce(MOCK_SLOTS)
+
+    const res = await request(app).get('/api/slots/available')
+
+    expect(res.body[0].id).toBe(1)
+    expect(res.body[1].id).toBe(2)
+  })
+
+  it('passes all slot fields through to the response', async () => {
+    vi.mocked(getAvailableSlots).mockResolvedValueOnce([MOCK_SLOTS[0]])
+
+    const res = await request(app).get('/api/slots/available')
+
+    expect(res.body[0]).toEqual(MOCK_SLOTS[0])
+  })
 })
