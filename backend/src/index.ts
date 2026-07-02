@@ -44,3 +44,5 @@ app.listen(PORT, async () => {
     console.error('❌ PostgreSQL connection failed:', err)
   }
 })
+
+export default app
