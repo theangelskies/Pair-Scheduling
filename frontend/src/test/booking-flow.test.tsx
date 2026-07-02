@@ -24,7 +24,7 @@ describe('booking flow', () => {
       expect(screen.getByText(/Alice García/i)).toBeInTheDocument()
     })
   })
-    it('shows a message when there are no available slots', async () => {
+  it('shows a message when there are no available slots', async () => {
     vi.mocked(api.getAvailableSlots).mockResolvedValue([])
 
     render(<Route.options.component />)
