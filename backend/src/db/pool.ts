@@ -5,4 +5,5 @@ import 'dotenv/config'
 // Never hardcode credentials; use environment variables instead.
 export const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
 })
