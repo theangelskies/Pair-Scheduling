@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { UserCard } from '../components/UserCard'
+import { api } from '../services/api'
 
 type User = { id: number; name: string; role: string }
 
@@ -16,11 +17,8 @@ function UsersPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch('/api/users')
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to fetch users')
-        return res.json()
-      })
+    api
+      .getUsers()
       .then((data) => {
         setUsers(data)
         setLoading(false)
