@@ -127,7 +127,7 @@ export function Trainee() {
       <div className={styles.confirmWrap}>
         <div className={styles.confirmCard}>
           <div className={styles.confirmIcon}>✓</div>
-          <h2>You're booked!</h2>
+          <h2>You're booked</h2>
           <p>Your session has been confirmed.</p>
           <div className={styles.confirmDetails}>
             {formatTimeRange(slot.start_time, slot.end_time)} · {formatDay(slot.start_time)}
