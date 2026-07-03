@@ -16,9 +16,7 @@ describe('POST /api/slots', () => {
     console.log('📤 REQUEST BODY:')
     console.log(JSON.stringify(payload, null, 2))
 
-    const res = await request(app)
-      .post('/api/slots')
-      .send(payload)
+    const res = await request(app).post('/api/slots').send(payload)
 
     console.log('RESPONSE STATUS:', res.status)
     console.log('RESPONSE BODY:')
@@ -41,9 +39,7 @@ describe('POST /api/slots', () => {
       end_time: end.toISOString(),
     }
 
-    const res = await request(app)
-      .post('/api/slots')
-      .send(payload)
+    const res = await request(app).post('/api/slots').send(payload)
 
     console.log('INVALID END TEST:', res.status, res.body)
 
@@ -60,9 +56,7 @@ describe('POST /api/slots', () => {
       end_time: end.toISOString(),
     }
 
-    const res = await request(app)
-      .post('/api/slots')
-      .send(payload)
+    const res = await request(app).post('/api/slots').send(payload)
 
     console.log('PAST TIME TEST:', res.status, res.body)
 
@@ -74,9 +68,7 @@ describe('POST /api/slots', () => {
       volunteer_id: 1,
     }
 
-    const res = await request(app)
-      .post('/api/slots')
-      .send(payload)
+    const res = await request(app).post('/api/slots').send(payload)
 
     console.log('MISSING FIELD TEST:', res.status, res.body)
 
