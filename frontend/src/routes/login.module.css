@@ -1,0 +1,180 @@
+.wrap {
+  min-height: calc(100vh - 57px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+.card h2 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0 0 0.4rem;
+}
+
+.card p {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  margin: 0 0 1.75rem;
+}
+
+/* ── Role toggle ── */
+.roleToggle {
+  display: flex;
+  background: var(--ground);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 3px;
+  margin-bottom: 1.5rem;
+}
+
+.roleOpt {
+  flex: 1;
+  padding: 0.45rem;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--ink-soft);
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.roleOpt.active {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+
+/* ── Demo accounts ── */
+.demoHint {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+}
+
+.demoUser {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0.6rem 0.85rem;
+  background: var(--ground);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+  width: 100%;
+}
+
+.demoUser:hover {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.demoName {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.demoEmail {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+/* ── Field ── */
+.fieldLabel {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.fieldInput {
+  width: 100%;
+  padding: 0.6rem 0.85rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.fieldInput:focus {
+  border-color: var(--accent);
+}
+
+.error {
+  font-size: 0.82rem;
+  color: var(--red);
+  margin-top: 0.4rem;
+}
+
+.btnPrimary {
+  width: 100%;
+  padding: 0.7rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1.25rem;
+  transition: background 0.15s;
+}
+
+.btnPrimary:hover {
+  background: var(--accent-dark);
+}
+
+/* ── Sent state ── */
+.sentIcon {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.emailHighlight {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.btnSecondary {
+  width: 100%;
+  padding: 0.7rem;
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-top: 0.75rem;
+  transition: background 0.15s;
+}
+
+.btnSecondary:hover {
+  background: var(--ground);
+}
