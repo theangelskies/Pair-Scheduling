@@ -4,7 +4,7 @@ import { pool } from '../db/pool.js' // Adjust path based on your template setup
 const router = Router()
 
 // GET /api/slots/available -> Fetch slots that aren't booked yet
-router.get('/available', async (req, res) => {
+router.get('/available', async (_req, res) => {
   try {
     const result = await pool.query(
       `SELECT ts.*, u.name as volunteer_name 
