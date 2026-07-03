@@ -9,9 +9,10 @@ const PORT: number = Number(process.env.PORT) || 3000
 // ── Middleware ──────────────────────────────────────────────────────────────
 app.use(express.json())
 
-// Allow requests from the frontend dev server
+// Allow requests from the frontend (dev server by default, or FRONTEND_URL in production)
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173'
 app.use((_req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
+  res.setHeader('Access-Control-Allow-Origin', FRONTEND_URL)
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
   next()
 })

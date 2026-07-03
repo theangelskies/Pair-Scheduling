@@ -10,6 +10,12 @@ const apiClient = axios.create({
 })
 
 export const api = {
+  // Users
+  getUsers: async () => {
+    const response = await apiClient.get('/users')
+    return response.data
+  },
+
   // Slots Management
   getAvailableSlots: async () => {
     const response = await apiClient.get('/slots/available')
