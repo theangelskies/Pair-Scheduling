@@ -1,21 +1,21 @@
 :root {
-  --ink:        #1a1a2e;
-  --ink-soft:   #5a5a7a;
-  --ink-faint:  #9494b0;
-  --surface:    #ffffff;
-  --ground:     #f4f4f8;
-  --border:     #e2e2ee;
-  --accent:     #5b5ef4;
+  --ink: #1a1a2e;
+  --ink-soft: #5a5a7a;
+  --ink-faint: #9494b0;
+  --surface: #ffffff;
+  --ground: #f4f4f8;
+  --border: #e2e2ee;
+  --accent: #5b5ef4;
   --accent-dim: #eeeeff;
-  --accent-dark:#3d40d4;
-  --green:      #00c896;
-  --green-dim:  #e0fdf5;
-  --red:        #ef4444;
-  --red-dim:    #fef2f2;
-  --radius:     10px;
-  --radius-lg:  16px;
-  --shadow:     0 2px 12px rgba(26,26,46,0.08);
-  --shadow-lg:  0 8px 32px rgba(26,26,46,0.14);
+  --accent-dark: #3d40d4;
+  --green: #00c896;
+  --green-dim: #e0fdf5;
+  --red: #ef4444;
+  --red-dim: #fef2f2;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --shadow: 0 2px 12px rgba(26, 26, 46, 0.08);
+  --shadow-lg: 0 8px 32px rgba(26, 26, 46, 0.14);
 }
 
 *,
@@ -26,7 +26,10 @@
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
   line-height: 1.5;
   color: var(--ink);
   background: var(--ground);

@@ -231,9 +231,7 @@ export function Volunteer() {
               <div className={styles.slotInfo}>
                 <div className={styles.slotTime}>{slot.timeRange}</div>
                 <div className={styles.slotDate}>{slot.date}</div>
-                {slot.bookedBy && (
-                  <div className={styles.bookedBy}>Booked by {slot.bookedBy}</div>
-                )}
+                {slot.bookedBy && <div className={styles.bookedBy}>Booked by {slot.bookedBy}</div>}
               </div>
               <div className={styles.slotRight}>
                 <span

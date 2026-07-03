@@ -51,7 +51,9 @@
   justify-content: space-between;
   gap: 1rem;
   cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 
 .slotCard:hover {

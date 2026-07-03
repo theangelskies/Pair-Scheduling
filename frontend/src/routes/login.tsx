@@ -28,9 +28,7 @@ export function Login() {
       setError('Please enter your email address.')
       return
     }
-    const match = DUMMY_USERS.find(
-      (u) => u.email === trimmed && u.role === role,
-    )
+    const match = DUMMY_USERS.find((u) => u.email === trimmed && u.role === role)
     if (!match) {
       setError(`No ${role} account found for that email.`)
       return
@@ -48,13 +46,21 @@ export function Login() {
         <div className={styles.roleToggle}>
           <button
             className={`${styles.roleOpt} ${role === 'trainee' ? styles.active : ''}`}
-            onClick={() => { setRole('trainee'); setEmail(''); setError('') }}
+            onClick={() => {
+              setRole('trainee')
+              setEmail('')
+              setError('')
+            }}
           >
             Trainee
           </button>
           <button
             className={`${styles.roleOpt} ${role === 'volunteer' ? styles.active : ''}`}
-            onClick={() => { setRole('volunteer'); setEmail(''); setError('') }}
+            onClick={() => {
+              setRole('volunteer')
+              setEmail('')
+              setError('')
+            }}
           >
             Volunteer
           </button>
@@ -65,7 +71,10 @@ export function Login() {
             <button
               key={u.email}
               className={styles.demoUser}
-              onClick={() => { setEmail(u.email); setError('') }}
+              onClick={() => {
+                setEmail(u.email)
+                setError('')
+              }}
             >
               <span className={styles.demoName}>{u.name}</span>
               <span className={styles.demoEmail}>{u.email}</span>
@@ -82,7 +91,10 @@ export function Login() {
           type="email"
           placeholder="you@example.com"
           value={email}
-          onChange={(e) => { setEmail(e.target.value); setError('') }}
+          onChange={(e) => {
+            setEmail(e.target.value)
+            setError('')
+          }}
           onKeyDown={(e) => e.key === 'Enter' && handleSignIn()}
         />
         {error && <p className={styles.error}>{error}</p>}
