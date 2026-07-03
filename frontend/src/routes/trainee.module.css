@@ -1,0 +1,338 @@
+.page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.header {
+  margin-bottom: 1.75rem;
+}
+
+.header h2 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem;
+}
+
+.header p {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* ── Day groups ── */
+.dayGroup {
+  margin-bottom: 1.75rem;
+}
+
+.dayLabel {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 0.65rem;
+}
+
+.slotsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* ── Slot card ── */
+.slotCard {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.85rem 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.slotCard:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow);
+}
+
+.slotCard.booked {
+  opacity: 0.45;
+  pointer-events: none;
+  cursor: default;
+}
+
+.slotTime {
+  font-weight: 600;
+  font-size: 0.95rem;
+  font-family: 'Menlo', 'Consolas', monospace;
+}
+
+.slotVol {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin-top: 0.1rem;
+}
+
+.slotRight {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* ── Badges ── */
+.badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.badgeAvailable {
+  background: var(--green-dim);
+  color: #009970;
+}
+
+.badgeBooked {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+/* ── Book button ── */
+.btnBook {
+  padding: 0.4rem 1rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.btnBook:hover {
+  background: var(--accent-dark);
+}
+
+/* ── Empty / loading / error ── */
+.emptyState {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+/* ── Modal ── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 26, 46, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+}
+
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 2rem;
+  width: 100%;
+  max-width: 440px;
+}
+
+.modal h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 1.25rem;
+}
+
+.modalSlotInfo {
+  background: var(--ground);
+  border-radius: var(--radius);
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.9rem;
+}
+
+.modalSlotInfo strong {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 0.2rem;
+}
+
+.modalSlotInfo span {
+  color: var(--ink-soft);
+}
+
+.fieldLabel {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.fieldLabel em {
+  font-style: normal;
+  font-weight: 400;
+  color: var(--ink-faint);
+}
+
+.textarea {
+  width: 100%;
+  padding: 0.6rem 0.85rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  outline: none;
+  resize: vertical;
+  min-height: 72px;
+  transition: border-color 0.15s;
+}
+
+.textarea:focus {
+  border-color: var(--accent);
+}
+
+.modalActions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+}
+
+.btnConfirm {
+  flex: 1;
+  padding: 0.65rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btnConfirm:hover {
+  background: var(--accent-dark);
+}
+
+.btnCancelModal {
+  padding: 0.65rem 1.1rem;
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btnCancelModal:hover {
+  background: var(--ground);
+}
+
+/* ── Confirmation ── */
+.confirmWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+}
+
+.confirmCard {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 2.5rem;
+  max-width: 440px;
+  width: 100%;
+  text-align: center;
+}
+
+.confirmIcon {
+  width: 56px;
+  height: 56px;
+  background: var(--green-dim);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+  font-size: 1.6rem;
+}
+
+.confirmCard h2 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+}
+
+.confirmCard p {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  margin: 0 0 1.5rem;
+}
+
+.meetLinkBox {
+  background: var(--accent-dim);
+  border: 1.5px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 0.85rem 1rem;
+  font-family: 'Menlo', 'Consolas', monospace;
+  font-size: 0.8rem;
+  color: var(--accent-dark);
+  word-break: break-all;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.meetLinkLabel {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 0.3rem;
+  font-family: inherit;
+}
+
+.confirmDetails {
+  background: var(--ground);
+  border-radius: var(--radius);
+  padding: 0.85rem 1rem;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.btnSecondary {
+  padding: 0.6rem 1.5rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btnSecondary:hover {
+  background: var(--ground);
+}

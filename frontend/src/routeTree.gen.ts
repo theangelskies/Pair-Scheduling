@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as VolunteerRouteImport } from './routes/volunteer'
 import { Route as UsersRouteImport } from './routes/users'
 import { Route as TraineeRouteImport } from './routes/trainee'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -30,6 +31,11 @@ const TraineeRoute = TraineeRouteImport.update({
   path: '/trainee',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -44,6 +50,7 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/login': typeof LoginRoute
   '/trainee': typeof TraineeRoute
   '/users': typeof UsersRoute
   '/volunteer': typeof VolunteerRoute
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/login': typeof LoginRoute
   '/trainee': typeof TraineeRoute
   '/users': typeof UsersRoute
   '/volunteer': typeof VolunteerRoute
@@ -59,21 +67,30 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/login': typeof LoginRoute
   '/trainee': typeof TraineeRoute
   '/users': typeof UsersRoute
   '/volunteer': typeof VolunteerRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/trainee' | '/users' | '/volunteer'
+  fullPaths: '/' | '/about' | '/login' | '/trainee' | '/users' | '/volunteer'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/trainee' | '/users' | '/volunteer'
-  id: '__root__' | '/' | '/about' | '/trainee' | '/users' | '/volunteer'
+  to: '/' | '/about' | '/login' | '/trainee' | '/users' | '/volunteer'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/login'
+    | '/trainee'
+    | '/users'
+    | '/volunteer'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  LoginRoute: typeof LoginRoute
   TraineeRoute: typeof TraineeRoute
   UsersRoute: typeof UsersRoute
   VolunteerRoute: typeof VolunteerRoute
@@ -102,6 +119,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TraineeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -122,6 +146,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  LoginRoute: LoginRoute,
   TraineeRoute: TraineeRoute,
   UsersRoute: UsersRoute,
   VolunteerRoute: VolunteerRoute,

@@ -1,13 +1,48 @@
-import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
+import { createRootRoute, Link, Outlet, useNavigate } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
 import styles from './__root.module.css'
 
-// __root.tsx is the layout that wraps ALL pages.
-// Add your nav, header, footer here.
 export const Route = createRootRoute({
   component: RootLayout,
 })
 
+function useCurrentUser() {
+  const [user, setUser] = useState<{ name: string; role: string } | null>(() => {
+    try {
+      const raw = localStorage.getItem('currentUser')
+      return raw ? JSON.parse(raw) : null
+    } catch {
+      return null
+    }
+  })
+
+  useEffect(() => {
+    function onStorage(e: StorageEvent) {
+      if (e.key === 'currentUser') {
+        try {
+          setUser(e.newValue ? JSON.parse(e.newValue) : null)
+        } catch {
+          setUser(null)
+        }
+      }
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [])
+
+  return { user, setUser }
+}
+
 function RootLayout() {
+  const navigate = useNavigate()
+  const { user, setUser } = useCurrentUser()
+
+  function handleSignOut() {
+    localStorage.removeItem('currentUser')
+    setUser(null)
+    void navigate({ to: '/login' })
+  }
+
   return (
     <>
       <nav className={styles.nav}>
@@ -42,9 +77,25 @@ function RootLayout() {
         >
           Volunteer
         </Link>
+        <Link
+          to="/login"
+          activeProps={{ className: styles.navLinkActive }}
+          className={styles.navLink}
+        >
+          Login
+        </Link>
+
+        {user && (
+          <div className={styles.userBadge}>
+            <span className={styles.userName}>{user.name}</span>
+            <span className={styles.userRole}>{user.role}</span>
+            <button className={styles.signOutBtn} onClick={handleSignOut}>
+              Sign out
+            </button>
+          </div>
+        )}
       </nav>
 
-      {/* Outlet renders the matched child route */}
       <main className={styles.main}>
         <Outlet />
       </main>
