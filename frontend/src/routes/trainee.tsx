@@ -80,6 +80,8 @@ function getCurrentUser() {
 }
 
 export function Trainee() {
+  const currentUser = getCurrentUser()
+  const canBook = currentUser?.role === 'trainee'
   const [slots, setSlots] = useState<Slot[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -108,7 +110,6 @@ export function Trainee() {
     } catch {
       // endpoint may not exist yet — still mark as booked
     }
-    const currentUser = getCurrentUser()
     persistBooking({
       slotId: modalSlot.id,
       traineeId: currentUser?.id ?? 0,
@@ -167,7 +168,7 @@ export function Trainee() {
                 <div
                   key={slot.id}
                   className={`${styles.slotCard} ${isBooked ? styles.booked : ''}`}
-                  onClick={() => !isBooked && setModalSlot(slot)}
+                  onClick={() => !isBooked && canBook && setModalSlot(slot)}
                 >
                   <div>
                     <div className={styles.slotTime}>
@@ -181,7 +182,7 @@ export function Trainee() {
                     >
                       {isBooked ? 'Booked' : 'Available'}
                     </span>
-                    {!isBooked && (
+                    {!isBooked && canBook && (
                       <button
                         className={styles.btnBook}
                         onClick={(e) => {

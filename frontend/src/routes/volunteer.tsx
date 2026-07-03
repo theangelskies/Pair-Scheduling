@@ -67,6 +67,7 @@ function readBookings(): Map<number, string> {
 
 export function Volunteer() {
   const currentUser = getCurrentUser()
+  const canCreateSlot = currentUser?.role === 'volunteer'
   const [mySlots, setMySlots] = useState<MySlot[]>([])
   const [date, setDate] = useState('')
   const [startTime, setStartTime] = useState('10:00')
@@ -159,65 +160,67 @@ export function Volunteer() {
         <p>Manage your available time slots.</p>
       </div>
 
-      <div className={styles.addSlotCard}>
-        <h3>Add a time slot</h3>
-        <div className={styles.formRow}>
-          <div className={styles.formField}>
-            <label className={styles.fieldLabel} htmlFor="slot-date">
-              Date
-            </label>
-            <input
-              id="slot-date"
-              className={styles.fieldInput}
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
+      {canCreateSlot && (
+        <div className={styles.addSlotCard}>
+          <h3>Add a time slot</h3>
+          <div className={styles.formRow}>
+            <div className={styles.formField}>
+              <label className={styles.fieldLabel} htmlFor="slot-date">
+                Date
+              </label>
+              <input
+                id="slot-date"
+                className={styles.fieldInput}
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+              />
+            </div>
+            <div className={styles.formField}>
+              <label className={styles.fieldLabel} htmlFor="slot-start">
+                Start time
+              </label>
+              <input
+                id="slot-start"
+                className={styles.fieldInput}
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+              />
+            </div>
+            <div className={styles.formField}>
+              <label className={styles.fieldLabel} htmlFor="slot-end">
+                End time
+              </label>
+              <input
+                id="slot-end"
+                className={styles.fieldInput}
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+              />
+            </div>
           </div>
-          <div className={styles.formField}>
-            <label className={styles.fieldLabel} htmlFor="slot-start">
-              Start time
-            </label>
-            <input
-              id="slot-start"
-              className={styles.fieldInput}
-              type="time"
-              value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
+          <div className={styles.toggleRow}>
+            <button
+              type="button"
+              className={`${styles.toggle} ${isRecurring ? styles.toggleOn : ''}`}
+              onClick={() => setIsRecurring((v) => !v)}
+              aria-pressed={isRecurring}
+              aria-label="Repeat weekly"
             />
+            <span className={styles.toggleLabel}>Repeat weekly</span>
           </div>
-          <div className={styles.formField}>
-            <label className={styles.fieldLabel} htmlFor="slot-end">
-              End time
-            </label>
-            <input
-              id="slot-end"
-              className={styles.fieldInput}
-              type="time"
-              value={endTime}
-              onChange={(e) => setEndTime(e.target.value)}
-            />
-          </div>
+          <button className={styles.btnAddSlot} onClick={handleAddSlot} disabled={submitting}>
+            {submitting ? 'Adding…' : '+ Add slot'}
+          </button>
+          {message && (
+            <p className={`${styles.message} ${message.error ? styles.messageError : ''}`}>
+              {message.text}
+            </p>
+          )}
         </div>
-        <div className={styles.toggleRow}>
-          <button
-            type="button"
-            className={`${styles.toggle} ${isRecurring ? styles.toggleOn : ''}`}
-            onClick={() => setIsRecurring((v) => !v)}
-            aria-pressed={isRecurring}
-            aria-label="Repeat weekly"
-          />
-          <span className={styles.toggleLabel}>Repeat weekly</span>
-        </div>
-        <button className={styles.btnAddSlot} onClick={handleAddSlot} disabled={submitting}>
-          {submitting ? 'Adding…' : '+ Add slot'}
-        </button>
-        {message && (
-          <p className={`${styles.message} ${message.error ? styles.messageError : ''}`}>
-            {message.text}
-          </p>
-        )}
-      </div>
+      )}
 
       {mySlots.length === 0 ? (
         <div className={styles.emptyState}>No slots yet. Add your first time slot above.</div>
