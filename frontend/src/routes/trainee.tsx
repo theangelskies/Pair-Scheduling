@@ -168,7 +168,6 @@ export function Trainee() {
                 <div
                   key={slot.id}
                   className={`${styles.slotCard} ${isBooked ? styles.booked : ''}`}
-                  onClick={() => !isBooked && canBook && setModalSlot(slot)}
                 >
                   <div>
                     <div className={styles.slotTime}>
@@ -203,8 +202,10 @@ export function Trainee() {
 
       {modalSlot && (
         <div
+          role="presentation"
           className={styles.overlay}
           onClick={(e) => e.target === e.currentTarget && setModalSlot(null)}
+          onKeyDown={(e) => e.key === 'Escape' && setModalSlot(null)}
         >
           <div className={styles.modal}>
             <h3>Confirm your booking</h3>
@@ -215,10 +216,11 @@ export function Trainee() {
               </strong>
               <span>with {modalSlot.volunteer_name}</span>
             </div>
-            <label className={styles.fieldLabel}>
+            <label className={styles.fieldLabel} htmlFor="booking-agenda">
               What would you like to work on? <em>(optional)</em>
             </label>
             <textarea
+              id="booking-agenda"
               className={styles.textarea}
               placeholder="e.g. I'd like help with understanding how to debug"
               value={agenda}
