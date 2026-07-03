@@ -3,10 +3,10 @@ import { useState } from 'react'
 import api from '../services/api'
 
 export const Route = createFileRoute('/volunteer')({
-  component: RouteComponent,
+  component: Volunteer,
 })
 
-function RouteComponent() {
+export function Volunteer() {
   const [message, setMessage] = useState<string | null>(null)
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -22,8 +22,12 @@ function RouteComponent() {
       minimum_notice_hours: 24,
     }
 
-    await api.createSlot(slotData)
-    setMessage('Slot created successfully!')
+    try {
+      await api.createSlot(slotData)
+      setMessage('Slot created successfully!')
+    } catch {
+      setMessage('Failed to create slot. Please try again.')
+    }
   }
 
   return (

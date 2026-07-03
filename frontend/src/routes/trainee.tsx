@@ -3,10 +3,10 @@ import { useEffect, useState } from 'react'
 import api from '../services/api'
 
 export const Route = createFileRoute('/trainee')({
-  component: RouteComponent,
+  component: Trainee,
 })
 
-function RouteComponent() {
+export function Trainee() {
   const [slots, setSlots] = useState<any[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
