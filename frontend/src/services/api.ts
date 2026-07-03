@@ -15,17 +15,17 @@ export const api = {
     const response = await apiClient.get('/slots/available')
     return response.data
   },
-  createSlot: async (slotData) => {
+  createSlot: async (slotData: Record<string, unknown>) => {
     const response = await apiClient.post('/slots', slotData)
     return response.data
   },
-  cancelSlot: async (slotId) => {
+  cancelSlot: async (slotId: number) => {
     const response = await apiClient.delete(`/slots/${slotId}`)
     return response.data
   },
 
   // Booking Management
-  bookSlot: async (slotId, bookingData) => {
+  bookSlot: async (slotId: number, bookingData: Record<string, unknown>) => {
     const response = await apiClient.post(`/slots/${slotId}/book`, bookingData)
     return response.data
   },

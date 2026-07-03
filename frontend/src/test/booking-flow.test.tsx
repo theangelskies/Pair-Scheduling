@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 
-import { Route } from '../routes/trainee'
+import { Trainee } from '../routes/trainee'
 import api from '../services/api'
 vi.mock('../services/api', () => ({
   default: {
@@ -18,7 +18,7 @@ describe('booking flow', () => {
       },
     ])
 
-    render(<Route.options.component />)
+    render(<Trainee />)
 
     await waitFor(() => {
       expect(screen.getByText(/Alice García/i)).toBeInTheDocument()
@@ -27,7 +27,7 @@ describe('booking flow', () => {
   it('shows a message when there are no available slots', async () => {
     vi.mocked(api.getAvailableSlots).mockResolvedValue([])
 
-    render(<Route.options.component />)
+    render(<Trainee />)
 
     await waitFor(() => {
       expect(screen.getByText(/No available slots/i)).toBeInTheDocument()
