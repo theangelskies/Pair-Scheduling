@@ -49,7 +49,9 @@ function formatDay(dateStr: string) {
 function getCurrentUser() {
   try {
     const raw = localStorage.getItem('currentUser')
-    return raw ? (JSON.parse(raw) as { id: number; name: string; email: string; role: string }) : null
+    return raw
+      ? (JSON.parse(raw) as { id: number; name: string; email: string; role: string })
+      : null
   } catch {
     return null
   }
