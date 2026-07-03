@@ -4,7 +4,7 @@ import { pool } from '../db/pool.js' // Adjust path based on your template setup
 const router = Router()
 
 // GET /api/slots/available -> Fetch slots that aren't booked yet
-router.get('/available', async (req, res) => {
+router.get('/available', async (_req, res) => {
   try {
     const result = await pool.query(
       `SELECT ts.*, u.name as volunteer_name 
@@ -22,13 +22,7 @@ router.get('/available', async (req, res) => {
 
 // POST /api/slots -> Volunteer creates a new availability window
 router.post('/', async (req, res) => {
-  const {
-    volunteer_id,
-    start_time,
-    end_time,
-    is_recurring,
-    minimum_notice_hours,
-  } = req.body
+  const { volunteer_id, start_time, end_time, is_recurring, minimum_notice_hours } = req.body
 
   try {
     // 1. required fields validation
@@ -78,13 +72,13 @@ router.post('/', async (req, res) => {
 
     return res.status(201).json(result.rows[0])
   } catch (err) {
-  const fs = await import('fs')
-  fs.appendFileSync(
-    '/tmp/debug.log',
-    `\n[${new Date().toISOString()}] POST /api/slots error:\n${String(err)}\n${(err as Error)?.stack}\n`
-  )
-  return res.status(500).json({ error: 'Failed to save slot', details: String(err) })
-}
+    const fs = await import('fs')
+    fs.appendFileSync(
+      '/tmp/debug.log',
+      `\n[${new Date().toISOString()}] POST /api/slots error:\n${String(err)}\n${(err as Error)?.stack}\n`,
+    )
+    return res.status(500).json({ error: 'Failed to save slot', details: String(err) })
+  }
 })
 
 export default router

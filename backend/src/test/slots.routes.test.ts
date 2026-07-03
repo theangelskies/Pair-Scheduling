@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-vi.mock('../services/slots.js', () => ({
-  getAvailableSlots: vi.fn(),
+vi.mock('../db/pool.js', () => ({
+  pool: { query: vi.fn() },
 }))
 
 import express from 'express'
 import request from 'supertest'
-import { getAvailableSlots } from '../services/slots.js'
+import { pool } from '../db/pool.js'
 import slotsRouter from '../routes/slots.js'
 
 const app = express()
@@ -40,7 +40,7 @@ describe('GET /api/slots/available', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('returns 200 with available slots', async () => {
-    vi.mocked(getAvailableSlots).mockResolvedValueOnce(MOCK_SLOTS)
+    pool.query.mockResolvedValueOnce({ rows: MOCK_SLOTS })
 
     const res = await request(app).get('/api/slots/available')
 
@@ -49,7 +49,7 @@ describe('GET /api/slots/available', () => {
   })
 
   it('returns slots with the correct shape', async () => {
-    vi.mocked(getAvailableSlots).mockResolvedValueOnce([MOCK_SLOTS[0]])
+    pool.query.mockResolvedValueOnce({ rows: [MOCK_SLOTS[0]] })
 
     const res = await request(app).get('/api/slots/available')
     const slot = res.body[0]
@@ -64,7 +64,7 @@ describe('GET /api/slots/available', () => {
   })
 
   it('returns 200 with empty array when no slots are available', async () => {
-    vi.mocked(getAvailableSlots).mockResolvedValueOnce([])
+    pool.query.mockResolvedValueOnce({ rows: [] })
 
     const res = await request(app).get('/api/slots/available')
 
@@ -72,8 +72,8 @@ describe('GET /api/slots/available', () => {
     expect(res.body).toEqual([])
   })
 
-  it('returns 500 when the service throws', async () => {
-    vi.mocked(getAvailableSlots).mockRejectedValueOnce(new Error('DB error'))
+  it('returns 500 when the database query fails', async () => {
+    pool.query.mockRejectedValueOnce(new Error('DB error'))
 
     const res = await request(app).get('/api/slots/available')
 
@@ -82,15 +82,15 @@ describe('GET /api/slots/available', () => {
   })
 
   it('responds with JSON content type', async () => {
-    vi.mocked(getAvailableSlots).mockResolvedValueOnce([])
+    pool.query.mockResolvedValueOnce({ rows: [] })
 
     const res = await request(app).get('/api/slots/available')
 
     expect(res.headers['content-type']).toMatch(/application\/json/)
   })
 
-  it('preserves slot order returned by the service', async () => {
-    vi.mocked(getAvailableSlots).mockResolvedValueOnce(MOCK_SLOTS)
+  it('preserves slot order returned by the database', async () => {
+    pool.query.mockResolvedValueOnce({ rows: MOCK_SLOTS })
 
     const res = await request(app).get('/api/slots/available')
 
@@ -99,7 +99,7 @@ describe('GET /api/slots/available', () => {
   })
 
   it('passes all slot fields through to the response', async () => {
-    vi.mocked(getAvailableSlots).mockResolvedValueOnce([MOCK_SLOTS[0]])
+    pool.query.mockResolvedValueOnce({ rows: [MOCK_SLOTS[0]] })
 
     const res = await request(app).get('/api/slots/available')
 
