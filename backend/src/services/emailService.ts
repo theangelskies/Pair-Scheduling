@@ -47,24 +47,27 @@ async function sendEmail(to: EmailPerson, subject: string, htmlContent: string):
 }
 
 export async function sendBookingConfirmationEmail(
-  params: BookingEmailParams & { meetLink: string },
+  params: BookingEmailParams & { meetLink: string | null },
 ): Promise<void> {
   const { volunteer, trainee, startTime, endTime, meetLink } = params
   const when = formatSessionTime(startTime, endTime)
   const subject = 'Your Pair Scheduling session is confirmed'
+  const meetLine = meetLink
+    ? `<p>Join via Google Meet: <a href="${meetLink}">${meetLink}</a></p>`
+    : ''
 
   await Promise.all([
     sendEmail(
       volunteer,
       subject,
       `<p>Your session with <strong>${trainee.name}</strong> is confirmed for <strong>${when}</strong>.</p>
-       <p>Join via Google Meet: <a href="${meetLink}">${meetLink}</a></p>`,
+       ${meetLine}`,
     ),
     sendEmail(
       trainee,
       subject,
       `<p>Your session with <strong>${volunteer.name}</strong> is confirmed for <strong>${when}</strong>.</p>
-       <p>Join via Google Meet: <a href="${meetLink}">${meetLink}</a></p>`,
+       ${meetLine}`,
     ),
   ])
 }
