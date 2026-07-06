@@ -44,6 +44,69 @@ const SLOT = {
 const VOLUNTEER = { id: 1, name: 'Alice García', email: 'alice@example.com', role: 'volunteer' }
 const TRAINEE = { id: 3, name: 'Carmen Liu', email: 'carmen@example.com', role: 'trainee' }
 
+describe('GET /api/bookings', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('returns 400 when traineeId is missing', async () => {
+    const res = await request(app).get('/api/bookings')
+
+    expect(res.status).toBe(400)
+    expect(pool.query).not.toHaveBeenCalled()
+  })
+
+  it("returns the trainee's confirmed bookings in the response shape", async () => {
+    pool.query.mockResolvedValueOnce({
+      rows: [
+        {
+          id: 99,
+          meet_link: 'https://meet.jit.si/pair-scheduling-abc123',
+          agenda: 'Help debugging a React hook',
+          start_time: SLOT.start_time,
+          end_time: SLOT.end_time,
+          volunteer_id: VOLUNTEER.id,
+          volunteer_name: VOLUNTEER.name,
+          volunteer_email: VOLUNTEER.email,
+        },
+      ],
+    })
+
+    const res = await request(app).get('/api/bookings').query({ traineeId: TRAINEE.id })
+
+    expect(res.status).toBe(200)
+    expect(res.body).toEqual([
+      {
+        bookingId: 99,
+        meetLink: 'https://meet.jit.si/pair-scheduling-abc123',
+        agenda: 'Help debugging a React hook',
+        startTime: SLOT.start_time,
+        endTime: SLOT.end_time,
+        volunteer: { id: VOLUNTEER.id, name: VOLUNTEER.name, email: VOLUNTEER.email },
+      },
+    ])
+  })
+
+  it('only queries confirmed bookings for the given trainee', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [] })
+
+    await request(app).get('/api/bookings').query({ traineeId: TRAINEE.id })
+
+    const [sql, params] = pool.query.mock.calls[0]
+    expect(sql).toContain("b.status = 'confirmed'")
+    expect(params).toEqual([String(TRAINEE.id)])
+  })
+
+  it('returns 500 when the database query fails', async () => {
+    pool.query.mockRejectedValueOnce(new Error('DB error'))
+
+    const res = await request(app).get('/api/bookings').query({ traineeId: TRAINEE.id })
+
+    expect(res.status).toBe(500)
+    expect(res.body).toEqual({ error: 'Database fetch failed' })
+  })
+})
+
 describe('POST /api/bookings', () => {
   beforeEach(() => {
     vi.clearAllMocks()

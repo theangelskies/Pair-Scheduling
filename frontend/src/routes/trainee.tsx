@@ -15,6 +15,15 @@ type Slot = {
   status: string
 }
 
+type Booking = {
+  bookingId: number
+  meetLink: string | null
+  agenda: string | null
+  startTime: string
+  endTime: string
+  volunteer: { id: number; name: string; email: string }
+}
+
 function fmtTime(s: string) {
   return new Date(s).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
 }
@@ -60,8 +69,9 @@ export function Trainee() {
   const [error, setError] = useState<string | null>(null)
   const [modalSlot, setModalSlot] = useState<Slot | null>(null)
   const [agenda, setAgenda] = useState('')
+  const [myBookings, setMyBookings] = useState<Booking[]>([])
 
-  useEffect(() => {
+  function refreshSlots() {
     api
       .getAvailableSlots()
       .then((data: Slot[]) => {
@@ -72,7 +82,34 @@ export function Trainee() {
         setError(err.message)
         setLoading(false)
       })
+  }
+
+  function refreshBookings() {
+    if (!currentUser) return
+    api
+      .getMyBookings(currentUser.id)
+      .then((data: Booking[]) => setMyBookings(data))
+      .catch(() => {
+        // silently ignore — show whatever we have
+      })
+  }
+
+  useEffect(() => {
+    refreshSlots()
+    refreshBookings()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  async function handleCancelBooking(bookingId: number) {
+    if (!currentUser || !confirm('Cancel this booking?')) return
+    try {
+      await api.cancelBooking(bookingId, currentUser.id)
+      refreshBookings()
+      refreshSlots()
+    } catch {
+      // best-effort — leave the list as-is if the cancel failed
+    }
+  }
 
   function confirmBooking() {
     if (!modalSlot || !currentUser) return
@@ -93,6 +130,41 @@ export function Trainee() {
 
   return (
     <div className={styles.page}>
+      {myBookings.length > 0 && (
+        <div className={styles.dayGroup}>
+          <div className={styles.header}>
+            <h2>My upcoming sessions</h2>
+          </div>
+          <div className={styles.slotsGrid}>
+            {myBookings.map((booking) => (
+              <div key={booking.bookingId} className={styles.slotCard}>
+                <div>
+                  <div className={styles.slotTime}>
+                    {formatTimeRange(booking.startTime, booking.endTime)} ·{' '}
+                    {formatDay(booking.startTime)}
+                  </div>
+                  <div className={styles.slotVol}>with {booking.volunteer.name}</div>
+                  {booking.meetLink && (
+                    <a href={booking.meetLink} target="_blank" rel="noreferrer">
+                      {booking.meetLink}
+                    </a>
+                  )}
+                </div>
+                <div className={styles.slotRight}>
+                  <span className={`${styles.badge} ${styles.badgeBooked}`}>Booked</span>
+                  <button
+                    className={styles.btnCancel}
+                    onClick={() => handleCancelBooking(booking.bookingId)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className={styles.header}>
         <h2>Available sessions</h2>
         <p>Pick a time that works for you.</p>

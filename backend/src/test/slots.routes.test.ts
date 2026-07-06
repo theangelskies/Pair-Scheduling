@@ -106,3 +106,48 @@ describe('GET /api/slots/available', () => {
     expect(res.body[0]).toEqual(MOCK_SLOTS[0])
   })
 })
+
+describe('GET /api/slots/mine', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('returns 400 when volunteerId is missing', async () => {
+    const res = await request(app).get('/api/slots/mine')
+
+    expect(res.status).toBe(400)
+    expect(pool.query).not.toHaveBeenCalled()
+  })
+
+  it("returns all of the volunteer's slots regardless of status", async () => {
+    pool.query.mockResolvedValueOnce({
+      rows: [
+        { ...MOCK_SLOTS[0], status: 'available', trainee_name: null },
+        { ...MOCK_SLOTS[0], id: 3, status: 'booked', trainee_name: 'Carmen Liu' },
+      ],
+    })
+
+    const res = await request(app).get('/api/slots/mine').query({ volunteerId: 1 })
+
+    expect(res.status).toBe(200)
+    expect(res.body).toHaveLength(2)
+    expect(res.body[1]).toMatchObject({ status: 'booked', trainee_name: 'Carmen Liu' })
+  })
+
+  it('filters by the given volunteerId', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [] })
+
+    await request(app).get('/api/slots/mine').query({ volunteerId: 4 })
+
+    expect(pool.query).toHaveBeenCalledWith(expect.stringContaining('WHERE ts.volunteer_id = $1'), [
+      '4',
+    ])
+  })
+
+  it('returns 500 when the database query fails', async () => {
+    pool.query.mockRejectedValueOnce(new Error('DB error'))
+
+    const res = await request(app).get('/api/slots/mine').query({ volunteerId: 1 })
+
+    expect(res.status).toBe(500)
+    expect(res.body).toEqual({ error: 'Database fetch failed' })
+  })
+})

@@ -5,6 +5,43 @@ import { sendBookingConfirmationEmail, sendBookingCancellationEmail } from '../s
 
 const router = Router()
 
+// GET /api/bookings?traineeId=X -> A trainee's own confirmed bookings
+router.get('/', async (req, res) => {
+  const { traineeId } = req.query
+
+  if (!traineeId) {
+    return res.status(400).json({ error: 'traineeId is required' })
+  }
+
+  try {
+    const result = await pool.query(
+      `SELECT b.id, b.meet_link, b.agenda,
+              ts.start_time, ts.end_time,
+              v.id AS volunteer_id, v.name AS volunteer_name, v.email AS volunteer_email
+       FROM bookings b
+       JOIN time_slots ts ON ts.id = b.slot_id
+       JOIN users v ON v.id = ts.volunteer_id
+       WHERE b.trainee_id = $1 AND b.status = 'confirmed'
+       ORDER BY ts.start_time ASC`,
+      [traineeId],
+    )
+
+    res.json(
+      result.rows.map((row) => ({
+        bookingId: row.id,
+        meetLink: row.meet_link,
+        agenda: row.agenda,
+        startTime: row.start_time,
+        endTime: row.end_time,
+        volunteer: { id: row.volunteer_id, name: row.volunteer_name, email: row.volunteer_email },
+      })),
+    )
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Database fetch failed' })
+  }
+})
+
 // POST /api/bookings -> Trainee books an available slot
 router.post('/', async (req, res) => {
   const { slotId, traineeId, agenda } = req.body

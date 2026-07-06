@@ -14,12 +14,7 @@ type ApiSlot = {
   start_time: string
   end_time: string
   status: string
-}
-
-type BookingRecord = {
-  slotId: number
-  traineeId: number
-  traineeName: string
+  trainee_name: string | null
 }
 
 type MySlot = {
@@ -57,16 +52,6 @@ function getCurrentUser() {
   }
 }
 
-function readBookings(): Map<number, string> {
-  try {
-    const raw = localStorage.getItem('bookedSlots')
-    const records = raw ? (JSON.parse(raw) as BookingRecord[]) : []
-    return new Map(records.map((r) => [r.slotId, r.traineeName]))
-  } catch {
-    return new Map()
-  }
-}
-
 export function Volunteer() {
   const currentUser = getCurrentUser()
   const canCreateSlot = currentUser?.role === 'volunteer'
@@ -79,24 +64,19 @@ export function Volunteer() {
   const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null)
 
   function apiSlotsToMySlots(data: ApiSlot[]): MySlot[] {
-    const bookings = readBookings()
-    return data
-      .filter((s) => s.volunteer_id === currentUser?.id)
-      .map((s) => {
-        const traineeName = bookings.get(s.id)
-        return {
-          id: s.id,
-          timeRange: formatTimeRange(s.start_time, s.end_time),
-          date: formatDay(s.start_time),
-          status: traineeName ? ('booked' as const) : ('available' as const),
-          bookedBy: traineeName,
-        }
-      })
+    return data.map((s) => ({
+      id: s.id,
+      timeRange: formatTimeRange(s.start_time, s.end_time),
+      date: formatDay(s.start_time),
+      status: s.status === 'available' ? ('available' as const) : ('booked' as const),
+      bookedBy: s.trainee_name ?? undefined,
+    }))
   }
 
   function refreshSlots() {
+    if (!currentUser) return
     api
-      .getAvailableSlots()
+      .getMySlots(currentUser.id)
       .then((data: ApiSlot[]) => {
         setMySlots(apiSlotsToMySlots(data))
       })

@@ -7,11 +7,36 @@ const router = Router()
 router.get('/available', async (_req, res) => {
   try {
     const result = await pool.query(
-      `SELECT ts.*, u.name as volunteer_name 
-       FROM time_slots ts 
-       JOIN users u ON ts.volunteer_id = u.id 
+      `SELECT ts.*, u.name as volunteer_name
+       FROM time_slots ts
+       JOIN users u ON ts.volunteer_id = u.id
        WHERE ts.status = 'available' AND ts.start_time > NOW()
        ORDER BY ts.start_time ASC`,
+    )
+    res.json(result.rows)
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Database fetch failed' })
+  }
+})
+
+// GET /api/slots/mine?volunteerId=X -> A volunteer's own slots, booked or not
+router.get('/mine', async (req, res) => {
+  const { volunteerId } = req.query
+
+  if (!volunteerId) {
+    return res.status(400).json({ error: 'volunteerId is required' })
+  }
+
+  try {
+    const result = await pool.query(
+      `SELECT ts.*, t.name AS trainee_name
+       FROM time_slots ts
+       LEFT JOIN bookings b ON b.slot_id = ts.id AND b.status = 'confirmed'
+       LEFT JOIN users t ON t.id = b.trainee_id
+       WHERE ts.volunteer_id = $1
+       ORDER BY ts.start_time ASC`,
+      [volunteerId],
     )
     res.json(result.rows)
   } catch (err) {

@@ -105,6 +105,27 @@
   color: var(--accent);
 }
 
+/* ── Cancel button ── */
+.btnCancel {
+  padding: 0.35rem 0.85rem;
+  background: transparent;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  color: var(--red);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+
+.btnCancel:hover {
+  background: var(--red-dim);
+  border-color: var(--red);
+}
+
 /* ── Book button ── */
 .btnBook {
   padding: 0.4rem 1rem;
