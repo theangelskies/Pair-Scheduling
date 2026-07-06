@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import axios from 'axios'
 import { useEffect, useState } from 'react'
 import api from '../services/api'
 import styles from './volunteer.module.css'
@@ -120,7 +121,7 @@ export function Volunteer() {
       refreshSlots()
     } catch (err) {
       const text =
-        (isAxiosErrorWithMessage(err) && err.response?.data?.error) ||
+        (axios.isAxiosError(err) && err.response?.data?.error) ||
         'Failed to create slot. Please try again.'
       setMessage({ text, error: true })
     } finally {
