@@ -12,6 +12,7 @@ const DUMMY_USERS: { id: number; email: string; name: string; role: Role }[] = [
   { id: 3, email: 'carmen@example.com', name: 'Carmen Liu', role: 'trainee' },
   { id: 1, email: 'alice@example.com', name: 'Alice García', role: 'volunteer' },
   { id: 2, email: 'bob@example.com', name: 'Bob Mwangi', role: 'volunteer' },
+  { id: 4, email: 'theangelskies@gmail.com', name: 'Volunteer Angela', role: 'volunteer' },
 ]
 
 export function Login() {
