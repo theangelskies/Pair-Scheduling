@@ -51,11 +51,13 @@ describe('POST /api/bookings', () => {
 
   it('books a slot successfully and returns a meet link', async () => {
     pool.query
+      .mockResolvedValueOnce({ rows: [] }) // BEGIN
       .mockResolvedValueOnce({ rows: [SLOT] }) // fetch slot
       .mockResolvedValueOnce({ rows: [VOLUNTEER] }) // fetch volunteer
       .mockResolvedValueOnce({ rows: [TRAINEE] }) // fetch trainee
       .mockResolvedValueOnce({ rows: [] }) // mark slot booked
       .mockResolvedValueOnce({ rows: [{ id: 99 }] }) // insert booking
+      .mockResolvedValueOnce({ rows: [] }) // COMMIT
 
     mockCreateMeetingLink.mockReturnValueOnce({
       meetLink: 'https://meet.jit.si/pair-scheduling-abc123',
@@ -79,11 +81,13 @@ describe('POST /api/bookings', () => {
 
   it('saves the agenda text on the booking when provided', async () => {
     pool.query
+      .mockResolvedValueOnce({ rows: [] }) // BEGIN
       .mockResolvedValueOnce({ rows: [SLOT] })
       .mockResolvedValueOnce({ rows: [VOLUNTEER] })
       .mockResolvedValueOnce({ rows: [TRAINEE] })
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [{ id: 99 }] })
+      .mockResolvedValueOnce({ rows: [] }) // COMMIT
 
     mockCreateMeetingLink.mockReturnValueOnce({
       meetLink: 'https://meet.jit.si/pair-scheduling-abc123',
@@ -100,7 +104,10 @@ describe('POST /api/bookings', () => {
   })
 
   it('returns 409 when the slot is already booked', async () => {
-    pool.query.mockResolvedValueOnce({ rows: [{ ...SLOT, status: 'booked' }] })
+    pool.query
+      .mockResolvedValueOnce({ rows: [] }) // BEGIN
+      .mockResolvedValueOnce({ rows: [{ ...SLOT, status: 'booked' }] }) // fetch slot
+      .mockResolvedValueOnce({ rows: [] }) // ROLLBACK
 
     const res = await request(app)
       .post('/api/bookings')
@@ -111,7 +118,10 @@ describe('POST /api/bookings', () => {
   })
 
   it('returns 404 when the slot does not exist', async () => {
-    pool.query.mockResolvedValueOnce({ rows: [] })
+    pool.query
+      .mockResolvedValueOnce({ rows: [] }) // BEGIN
+      .mockResolvedValueOnce({ rows: [] }) // fetch slot (not found)
+      .mockResolvedValueOnce({ rows: [] }) // ROLLBACK
 
     const res = await request(app)
       .post('/api/bookings')
@@ -123,11 +133,13 @@ describe('POST /api/bookings', () => {
 
   it('sends a booking confirmation email to the volunteer and trainee', async () => {
     pool.query
+      .mockResolvedValueOnce({ rows: [] }) // BEGIN
       .mockResolvedValueOnce({ rows: [SLOT] })
       .mockResolvedValueOnce({ rows: [VOLUNTEER] })
       .mockResolvedValueOnce({ rows: [TRAINEE] })
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [{ id: 99 }] })
+      .mockResolvedValueOnce({ rows: [] }) // COMMIT
 
     mockCreateMeetingLink.mockReturnValueOnce({
       meetLink: 'https://meet.jit.si/pair-scheduling-abc123',
@@ -173,10 +185,12 @@ describe('PATCH /api/bookings/:id/cancel', () => {
 
   it('cancels the booking and reopens the slot', async () => {
     pool.query
+      .mockResolvedValueOnce({ rows: [] }) // BEGIN
       .mockResolvedValueOnce({ rows: [BOOKING] }) // fetch booking joined with slot
       .mockResolvedValueOnce({ rows: [{ role: 'trainee' }] }) // fetch requesting user
       .mockResolvedValueOnce({ rows: [] }) // update booking status
       .mockResolvedValueOnce({ rows: [] }) // update slot status
+      .mockResolvedValueOnce({ rows: [] }) // COMMIT
 
     const res = await request(app)
       .patch(`/api/bookings/${BOOKING.id}/cancel`)
@@ -199,8 +213,10 @@ describe('PATCH /api/bookings/:id/cancel', () => {
 
   it('returns 403 when the requesting user is neither the volunteer, trainee, nor an admin', async () => {
     pool.query
+      .mockResolvedValueOnce({ rows: [] }) // BEGIN
       .mockResolvedValueOnce({ rows: [BOOKING] })
       .mockResolvedValueOnce({ rows: [{ role: 'trainee' }] })
+      .mockResolvedValueOnce({ rows: [] }) // ROLLBACK
 
     const res = await request(app)
       .patch(`/api/bookings/${BOOKING.id}/cancel`)
@@ -212,10 +228,12 @@ describe('PATCH /api/bookings/:id/cancel', () => {
 
   it('allows cancellation when the requesting user is an admin', async () => {
     pool.query
+      .mockResolvedValueOnce({ rows: [] }) // BEGIN
       .mockResolvedValueOnce({ rows: [BOOKING] })
       .mockResolvedValueOnce({ rows: [{ role: 'admin' }] })
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] }) // COMMIT
 
     const res = await request(app)
       .patch(`/api/bookings/${BOOKING.id}/cancel`)
@@ -225,7 +243,10 @@ describe('PATCH /api/bookings/:id/cancel', () => {
   })
 
   it('returns 404 when the booking does not exist', async () => {
-    pool.query.mockResolvedValueOnce({ rows: [] })
+    pool.query
+      .mockResolvedValueOnce({ rows: [] }) // BEGIN
+      .mockResolvedValueOnce({ rows: [] }) // fetch booking (not found)
+      .mockResolvedValueOnce({ rows: [] }) // ROLLBACK
 
     const res = await request(app)
       .patch('/api/bookings/999/cancel')
