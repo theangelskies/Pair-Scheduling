@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { pool } from '../db/pool.js'
-import { createCalendarEvent, deleteCalendarEvent } from '../services/calendarService.js'
+import { createMeetingLink } from '../services/calendarService.js'
 import { sendBookingConfirmationEmail, sendBookingCancellationEmail } from '../services/emailService.js'
 
 const router = Router()
@@ -34,18 +34,13 @@ router.post('/', async (req, res) => {
 
     await pool.query('UPDATE time_slots SET status = $1 WHERE id = $2', ['booked', slot.id])
 
-    const { googleEventId, meetLink } = await createCalendarEvent({
-      startTime: slot.start_time,
-      endTime: slot.end_time,
-      volunteer: { email: volunteer.email, name: volunteer.name },
-      trainee: { email: trainee.email, name: trainee.name },
-    })
+    const { meetLink } = createMeetingLink()
 
     const bookingResult = await pool.query(
-      `INSERT INTO bookings (slot_id, trainee_id, google_event_id, google_meet_link, agenda)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO bookings (slot_id, trainee_id, meet_link, agenda)
+       VALUES ($1, $2, $3, $4)
        RETURNING id`,
-      [slot.id, traineeId, googleEventId, meetLink, agenda ?? null],
+      [slot.id, traineeId, meetLink, agenda ?? null],
     )
 
     await sendBookingConfirmationEmail({
@@ -77,7 +72,7 @@ router.patch('/:id/cancel', async (req, res) => {
 
   try {
     const bookingResult = await pool.query(
-      `SELECT b.id, b.slot_id, b.trainee_id, b.google_event_id, b.status,
+      `SELECT b.id, b.slot_id, b.trainee_id, b.status,
               ts.volunteer_id, ts.start_time, ts.end_time,
               v.name AS volunteer_name, v.email AS volunteer_email,
               t.name AS trainee_name, t.email AS trainee_email
@@ -104,8 +99,6 @@ router.patch('/:id/cancel', async (req, res) => {
     if (!isVolunteer && !isTrainee && !isAdmin) {
       return res.status(403).json({ error: 'Not authorized to cancel this booking' })
     }
-
-    await deleteCalendarEvent(booking.google_event_id)
 
     await pool.query('UPDATE bookings SET status = $1 WHERE id = $2', ['cancelled', booking.id])
     await pool.query('UPDATE time_slots SET status = $1 WHERE id = $2', [

@@ -71,9 +71,9 @@ function BookConfirmation() {
         <div className={styles.card}>
           <div className={`${styles.icon} ${styles.iconSuccess}`}>✓</div>
           <h2>You're booked</h2>
-          <p>A calendar invite with a Google Meet link has been sent to both of you.</p>
+          <p>A Jitsi Meet link has been sent to both of you.</p>
           <div className={styles.meetLinkBox}>
-            <div className={styles.meetLinkLabel}>Google Meet link</div>
+            <div className={styles.meetLinkLabel}>Jitsi Meet link</div>
             <a href={state.meetLink} target="_blank" rel="noreferrer">
               {state.meetLink}
             </a>

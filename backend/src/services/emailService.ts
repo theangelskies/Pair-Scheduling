@@ -53,7 +53,7 @@ export async function sendBookingConfirmationEmail(
   const when = formatSessionTime(startTime, endTime)
   const subject = 'Your Pair Scheduling session is confirmed'
   const meetLine = meetLink
-    ? `<p>Join via Google Meet: <a href="${meetLink}">${meetLink}</a></p>`
+    ? `<p>Join via Jitsi Meet: <a href="${meetLink}">${meetLink}</a></p>`
     : ''
 
   await Promise.all([
