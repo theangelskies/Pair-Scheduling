@@ -1,7 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+const { mockQuery } = vi.hoisted(() => ({ mockQuery: vi.fn() }))
+
 vi.mock('../db/pool.js', () => ({
-  pool: { query: vi.fn() },
+  pool: {
+    query: mockQuery,
+    connect: vi.fn(async () => ({ query: mockQuery, release: vi.fn() })),
+  },
 }))
 
 const { mockCreateMeetingLink, mockSendConfirmation, mockSendCancellation } = vi.hoisted(() => ({

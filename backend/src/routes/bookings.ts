@@ -13,35 +13,45 @@ router.post('/', async (req, res) => {
     return res.status(400).json({ error: 'slotId and traineeId are required' })
   }
 
+  const client = await pool.connect()
+
   try {
-    const slotResult = await pool.query('SELECT * FROM time_slots WHERE id = $1', [slotId])
+    await client.query('BEGIN')
+
+    const slotResult = await client.query('SELECT * FROM time_slots WHERE id = $1 FOR UPDATE', [
+      slotId,
+    ])
     const slot = slotResult.rows[0]
 
     if (!slot) {
+      await client.query('ROLLBACK')
       return res.status(404).json({ error: 'Slot not found' })
     }
     if (slot.status !== 'available') {
+      await client.query('ROLLBACK')
       return res.status(409).json({ error: 'Slot is no longer available' })
     }
 
-    const volunteerResult = await pool.query('SELECT * FROM users WHERE id = $1', [
+    const volunteerResult = await client.query('SELECT * FROM users WHERE id = $1', [
       slot.volunteer_id,
     ])
     const volunteer = volunteerResult.rows[0]
 
-    const traineeResult = await pool.query('SELECT * FROM users WHERE id = $1', [traineeId])
+    const traineeResult = await client.query('SELECT * FROM users WHERE id = $1', [traineeId])
     const trainee = traineeResult.rows[0]
 
-    await pool.query('UPDATE time_slots SET status = $1 WHERE id = $2', ['booked', slot.id])
+    await client.query('UPDATE time_slots SET status = $1 WHERE id = $2', ['booked', slot.id])
 
     const { meetLink } = createMeetingLink()
 
-    const bookingResult = await pool.query(
+    const bookingResult = await client.query(
       `INSERT INTO bookings (slot_id, trainee_id, meet_link, agenda)
        VALUES ($1, $2, $3, $4)
        RETURNING id`,
       [slot.id, traineeId, meetLink, agenda ?? null],
     )
+
+    await client.query('COMMIT')
 
     await sendBookingConfirmationEmail({
       volunteer: { email: volunteer.email, name: volunteer.name },
@@ -61,8 +71,11 @@ router.post('/', async (req, res) => {
       },
     })
   } catch (err) {
+    await client.query('ROLLBACK')
     console.error(err)
     return res.status(500).json({ error: 'Failed to create booking' })
+  } finally {
+    client.release()
   }
 })
 
@@ -70,8 +83,12 @@ router.post('/', async (req, res) => {
 router.patch('/:id/cancel', async (req, res) => {
   const { userId } = req.body
 
+  const client = await pool.connect()
+
   try {
-    const bookingResult = await pool.query(
+    await client.query('BEGIN')
+
+    const bookingResult = await client.query(
       `SELECT b.id, b.slot_id, b.trainee_id, b.status,
               ts.volunteer_id, ts.start_time, ts.end_time,
               v.name AS volunteer_name, v.email AS volunteer_email,
@@ -80,16 +97,18 @@ router.patch('/:id/cancel', async (req, res) => {
        JOIN time_slots ts ON b.slot_id = ts.id
        JOIN users v ON v.id = ts.volunteer_id
        JOIN users t ON t.id = b.trainee_id
-       WHERE b.id = $1`,
+       WHERE b.id = $1
+       FOR UPDATE OF b`,
       [req.params.id],
     )
     const booking = bookingResult.rows[0]
 
     if (!booking) {
+      await client.query('ROLLBACK')
       return res.status(404).json({ error: 'Booking not found' })
     }
 
-    const userResult = await pool.query('SELECT role FROM users WHERE id = $1', [userId])
+    const userResult = await client.query('SELECT role FROM users WHERE id = $1', [userId])
     const requestingUser = userResult.rows[0]
 
     const isVolunteer = userId === booking.volunteer_id
@@ -97,14 +116,17 @@ router.patch('/:id/cancel', async (req, res) => {
     const isAdmin = requestingUser?.role === 'admin'
 
     if (!isVolunteer && !isTrainee && !isAdmin) {
+      await client.query('ROLLBACK')
       return res.status(403).json({ error: 'Not authorized to cancel this booking' })
     }
 
-    await pool.query('UPDATE bookings SET status = $1 WHERE id = $2', ['cancelled', booking.id])
-    await pool.query('UPDATE time_slots SET status = $1 WHERE id = $2', [
+    await client.query('UPDATE bookings SET status = $1 WHERE id = $2', ['cancelled', booking.id])
+    await client.query('UPDATE time_slots SET status = $1 WHERE id = $2', [
       'available',
       booking.slot_id,
     ])
+
+    await client.query('COMMIT')
 
     await sendBookingCancellationEmail({
       volunteer: { email: booking.volunteer_email, name: booking.volunteer_name },
@@ -115,8 +137,11 @@ router.patch('/:id/cancel', async (req, res) => {
 
     return res.status(200).json({ success: true })
   } catch (err) {
+    await client.query('ROLLBACK')
     console.error(err)
     return res.status(500).json({ error: 'Failed to cancel booking' })
+  } finally {
+    client.release()
   }
 })
 
