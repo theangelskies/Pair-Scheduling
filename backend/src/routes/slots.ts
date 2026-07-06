@@ -30,7 +30,7 @@ router.get('/mine', async (req, res) => {
 
   try {
     const result = await pool.query(
-      `SELECT ts.*, t.name AS trainee_name
+      `SELECT ts.*, t.name AS trainee_name, b.id AS booking_id
        FROM time_slots ts
        LEFT JOIN bookings b ON b.slot_id = ts.id AND b.status = 'confirmed'
        LEFT JOIN users t ON t.id = b.trainee_id

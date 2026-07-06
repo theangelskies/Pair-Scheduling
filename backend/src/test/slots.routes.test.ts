@@ -120,8 +120,8 @@ describe('GET /api/slots/mine', () => {
   it("returns all of the volunteer's slots regardless of status", async () => {
     pool.query.mockResolvedValueOnce({
       rows: [
-        { ...MOCK_SLOTS[0], status: 'available', trainee_name: null },
-        { ...MOCK_SLOTS[0], id: 3, status: 'booked', trainee_name: 'Carmen Liu' },
+        { ...MOCK_SLOTS[0], status: 'available', trainee_name: null, booking_id: null },
+        { ...MOCK_SLOTS[0], id: 3, status: 'booked', trainee_name: 'Carmen Liu', booking_id: 42 },
       ],
     })
 
@@ -129,7 +129,11 @@ describe('GET /api/slots/mine', () => {
 
     expect(res.status).toBe(200)
     expect(res.body).toHaveLength(2)
-    expect(res.body[1]).toMatchObject({ status: 'booked', trainee_name: 'Carmen Liu' })
+    expect(res.body[1]).toMatchObject({
+      status: 'booked',
+      trainee_name: 'Carmen Liu',
+      booking_id: 42,
+    })
   })
 
   it('filters by the given volunteerId', async () => {

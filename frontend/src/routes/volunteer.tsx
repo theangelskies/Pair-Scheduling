@@ -16,6 +16,7 @@ type ApiSlot = {
   end_time: string
   status: string
   trainee_name: string | null
+  booking_id: number | null
 }
 
 type MySlot = {
@@ -24,6 +25,7 @@ type MySlot = {
   date: string
   status: 'available' | 'booked'
   bookedBy?: string
+  bookingId?: number
 }
 
 function fmtTime(s: string) {
@@ -71,6 +73,7 @@ export function Volunteer() {
       date: formatDay(s.start_time),
       status: s.status === 'available' ? ('available' as const) : ('booked' as const),
       bookedBy: s.trainee_name ?? undefined,
+      bookingId: s.booking_id ?? undefined,
     }))
   }
 
@@ -129,11 +132,23 @@ export function Volunteer() {
     }
   }
 
-  async function handleCancel(id: number) {
+  async function handleCancel(slot: MySlot) {
+    if (slot.status === 'booked') {
+      if (!currentUser || !confirm('Cancel this booked session? The trainee will be notified.'))
+        return
+      try {
+        await api.cancelBooking(slot.bookingId!, currentUser.id)
+        refreshSlots()
+      } catch {
+        setMessage({ text: 'Could not cancel that booking. Please try again.', error: true })
+      }
+      return
+    }
+
     if (!confirm('Cancel this time slot?')) return
     try {
-      await api.cancelSlot(id)
-      setMySlots((prev) => prev.filter((s) => s.id !== id))
+      await api.cancelSlot(slot.id)
+      setMySlots((prev) => prev.filter((s) => s.id !== slot.id))
     } catch {
       setMessage({
         text: 'Could not cancel that slot — it may already be booked.',
@@ -229,11 +244,9 @@ export function Volunteer() {
                 >
                   {slot.status === 'available' ? 'Available' : 'Booked'}
                 </span>
-                {slot.status === 'available' && (
-                  <button className={styles.btnCancel} onClick={() => handleCancel(slot.id)}>
-                    Cancel
-                  </button>
-                )}
+                <button className={styles.btnCancel} onClick={() => handleCancel(slot)}>
+                  Cancel
+                </button>
               </div>
             </div>
           ))}
