@@ -4,8 +4,10 @@ vi.mock('../db/pool.js', () => ({
   pool: { query: vi.fn() },
 }))
 
-const mockCreateCalendarEvent = vi.fn()
-const mockDeleteCalendarEvent = vi.fn()
+const { mockCreateCalendarEvent, mockDeleteCalendarEvent } = vi.hoisted(() => ({
+  mockCreateCalendarEvent: vi.fn(),
+  mockDeleteCalendarEvent: vi.fn(),
+}))
 
 vi.mock('../services/calendarService.js', () => ({
   createCalendarEvent: mockCreateCalendarEvent,
