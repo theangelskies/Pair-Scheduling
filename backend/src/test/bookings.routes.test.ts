@@ -152,9 +152,9 @@ describe('PATCH /api/bookings/:id/cancel', () => {
     expect(mockDeleteCalendarEvent).toHaveBeenCalledWith(BOOKING.google_event_id)
 
     const slotUpdateCall = pool.query.mock.calls.find(
-      (call) => typeof call[0] === 'string' && call[0].includes('time_slots'),
+      (call) => typeof call[0] === 'string' && call[0].startsWith('UPDATE time_slots'),
     )
-    expect(slotUpdateCall?.[0]).toMatch(/available/)
+    expect(slotUpdateCall?.[1]).toEqual(['available', BOOKING.slot_id])
   })
 
   it('returns 403 when the requesting user is neither the volunteer, trainee, nor an admin', async () => {
