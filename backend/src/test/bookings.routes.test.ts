@@ -52,9 +52,8 @@ describe('POST /api/bookings', () => {
       .mockResolvedValueOnce({ rows: [] }) // mark slot booked
       .mockResolvedValueOnce({ rows: [{ id: 99 }] }) // insert booking
 
-    mockCreateCalendarEvent.mockResolvedValueOnce({
-      googleEventId: 'event-123',
-      meetLink: 'https://meet.google.com/abc-defg-hij',
+    mockCreateMeetingLink.mockReturnValueOnce({
+      meetLink: 'https://meet.jit.si/pair-scheduling-abc123',
     })
 
     const res = await request(app)
@@ -64,7 +63,7 @@ describe('POST /api/bookings', () => {
     expect(res.status).toBe(201)
     expect(res.body).toEqual({
       bookingId: 99,
-      meetLink: 'https://meet.google.com/abc-defg-hij',
+      meetLink: 'https://meet.jit.si/pair-scheduling-abc123',
       slot: {
         startTime: SLOT.start_time,
         endTime: SLOT.end_time,
@@ -81,9 +80,8 @@ describe('POST /api/bookings', () => {
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [{ id: 99 }] })
 
-    mockCreateCalendarEvent.mockResolvedValueOnce({
-      googleEventId: 'event-123',
-      meetLink: 'https://meet.google.com/abc-defg-hij',
+    mockCreateMeetingLink.mockReturnValueOnce({
+      meetLink: 'https://meet.jit.si/pair-scheduling-abc123',
     })
 
     await request(app)
@@ -93,7 +91,7 @@ describe('POST /api/bookings', () => {
     const insertCall = pool.query.mock.calls.find(
       (call) => typeof call[0] === 'string' && call[0].includes('INSERT INTO bookings'),
     )
-    expect(insertCall?.[1]).toEqual([SLOT.id, TRAINEE.id, 'event-123', 'https://meet.google.com/abc-defg-hij', 'Help debugging a React hook'])
+    expect(insertCall?.[1]).toEqual([SLOT.id, TRAINEE.id, 'https://meet.jit.si/pair-scheduling-abc123', 'Help debugging a React hook'])
   })
 
   it('returns 409 when the slot is already booked', async () => {
@@ -104,7 +102,7 @@ describe('POST /api/bookings', () => {
       .send({ slotId: SLOT.id, traineeId: TRAINEE.id })
 
     expect(res.status).toBe(409)
-    expect(mockCreateCalendarEvent).not.toHaveBeenCalled()
+    expect(mockCreateMeetingLink).not.toHaveBeenCalled()
   })
 
   it('returns 404 when the slot does not exist', async () => {
@@ -115,30 +113,7 @@ describe('POST /api/bookings', () => {
       .send({ slotId: 999, traineeId: TRAINEE.id })
 
     expect(res.status).toBe(404)
-    expect(mockCreateCalendarEvent).not.toHaveBeenCalled()
-  })
-
-  it('calls createCalendarEvent with the correct volunteer, trainee, and time arguments', async () => {
-    pool.query
-      .mockResolvedValueOnce({ rows: [SLOT] })
-      .mockResolvedValueOnce({ rows: [VOLUNTEER] })
-      .mockResolvedValueOnce({ rows: [TRAINEE] })
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({ rows: [{ id: 99 }] })
-
-    mockCreateCalendarEvent.mockResolvedValueOnce({
-      googleEventId: 'event-123',
-      meetLink: 'https://meet.google.com/abc-defg-hij',
-    })
-
-    await request(app).post('/api/bookings').send({ slotId: SLOT.id, traineeId: TRAINEE.id })
-
-    expect(mockCreateCalendarEvent).toHaveBeenCalledWith({
-      startTime: SLOT.start_time,
-      endTime: SLOT.end_time,
-      volunteer: { email: VOLUNTEER.email, name: VOLUNTEER.name },
-      trainee: { email: TRAINEE.email, name: TRAINEE.name },
-    })
+    expect(mockCreateMeetingLink).not.toHaveBeenCalled()
   })
 
   it('sends a booking confirmation email to the volunteer and trainee', async () => {
@@ -149,9 +124,8 @@ describe('POST /api/bookings', () => {
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [{ id: 99 }] })
 
-    mockCreateCalendarEvent.mockResolvedValueOnce({
-      googleEventId: 'event-123',
-      meetLink: 'https://meet.google.com/abc-defg-hij',
+    mockCreateMeetingLink.mockReturnValueOnce({
+      meetLink: 'https://meet.jit.si/pair-scheduling-abc123',
     })
 
     await request(app).post('/api/bookings').send({ slotId: SLOT.id, traineeId: TRAINEE.id })
@@ -161,7 +135,7 @@ describe('POST /api/bookings', () => {
       trainee: { email: TRAINEE.email, name: TRAINEE.name },
       startTime: SLOT.start_time,
       endTime: SLOT.end_time,
-      meetLink: 'https://meet.google.com/abc-defg-hij',
+      meetLink: 'https://meet.jit.si/pair-scheduling-abc123',
     })
   })
 
@@ -179,7 +153,6 @@ describe('PATCH /api/bookings/:id/cancel', () => {
     slot_id: SLOT.id,
     trainee_id: TRAINEE.id,
     volunteer_id: VOLUNTEER.id,
-    google_event_id: 'event-123',
     status: 'confirmed',
     start_time: SLOT.start_time,
     end_time: SLOT.end_time,
@@ -193,21 +166,18 @@ describe('PATCH /api/bookings/:id/cancel', () => {
     vi.clearAllMocks()
   })
 
-  it('cancels the booking, deletes the calendar event, and reopens the slot', async () => {
+  it('cancels the booking and reopens the slot', async () => {
     pool.query
       .mockResolvedValueOnce({ rows: [BOOKING] }) // fetch booking joined with slot
       .mockResolvedValueOnce({ rows: [{ role: 'trainee' }] }) // fetch requesting user
       .mockResolvedValueOnce({ rows: [] }) // update booking status
       .mockResolvedValueOnce({ rows: [] }) // update slot status
 
-    mockDeleteCalendarEvent.mockResolvedValueOnce(undefined)
-
     const res = await request(app)
       .patch(`/api/bookings/${BOOKING.id}/cancel`)
       .send({ userId: TRAINEE.id })
 
     expect(res.status).toBe(200)
-    expect(mockDeleteCalendarEvent).toHaveBeenCalledWith(BOOKING.google_event_id)
 
     const slotUpdateCall = pool.query.mock.calls.find(
       (call) => typeof call[0] === 'string' && call[0].startsWith('UPDATE time_slots'),
@@ -232,7 +202,6 @@ describe('PATCH /api/bookings/:id/cancel', () => {
       .send({ userId: 42 })
 
     expect(res.status).toBe(403)
-    expect(mockDeleteCalendarEvent).not.toHaveBeenCalled()
     expect(mockSendCancellation).not.toHaveBeenCalled()
   })
 
@@ -243,14 +212,11 @@ describe('PATCH /api/bookings/:id/cancel', () => {
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [] })
 
-    mockDeleteCalendarEvent.mockResolvedValueOnce(undefined)
-
     const res = await request(app)
       .patch(`/api/bookings/${BOOKING.id}/cancel`)
       .send({ userId: 7 })
 
     expect(res.status).toBe(200)
-    expect(mockDeleteCalendarEvent).toHaveBeenCalledWith(BOOKING.google_event_id)
   })
 
   it('returns 404 when the booking does not exist', async () => {
@@ -261,6 +227,5 @@ describe('PATCH /api/bookings/:id/cancel', () => {
       .send({ userId: TRAINEE.id })
 
     expect(res.status).toBe(404)
-    expect(mockDeleteCalendarEvent).not.toHaveBeenCalled()
   })
 })
