@@ -82,11 +82,23 @@ router.post('/', async (req, res) => {
       })
     }
 
-    // 5. defaults
+    // 5. reject overlapping slots for the same volunteer
+    const overlapping = await pool.query(
+      `SELECT id FROM time_slots
+       WHERE volunteer_id = $1 AND start_time < $3 AND end_time > $2`,
+      [volunteer_id, start, end],
+    )
+    if (overlapping.rows.length > 0) {
+      return res.status(409).json({
+        error: 'You already have a slot that overlaps this time range',
+      })
+    }
+
+    // 6. defaults
     const recurring = is_recurring ?? false
     const noticeHours = minimum_notice_hours ?? 24
 
-    // 6. insert into DB
+    // 7. insert into DB
     const result = await pool.query(
       `INSERT INTO time_slots 
       (volunteer_id, start_time, end_time, is_recurring, minimum_notice_hours) 
@@ -103,6 +115,25 @@ router.post('/', async (req, res) => {
       `\n[${new Date().toISOString()}] POST /api/slots error:\n${String(err)}\n${(err as Error)?.stack}\n`,
     )
     return res.status(500).json({ error: 'Failed to save slot', details: String(err) })
+  }
+})
+
+// DELETE /api/slots/:id -> Volunteer cancels an available (unbooked) slot
+router.delete('/:id', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `DELETE FROM time_slots WHERE id = $1 AND status = 'available' RETURNING id`,
+      [req.params.id],
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(409).json({ error: 'Slot not found or already booked' })
+    }
+
+    return res.status(200).json({ success: true })
+  } catch (err) {
+    console.error(err)
+    return res.status(500).json({ error: 'Failed to cancel slot' })
   }
 })
 

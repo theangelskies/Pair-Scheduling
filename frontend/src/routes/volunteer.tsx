@@ -118,8 +118,11 @@ export function Volunteer() {
       setDate('')
       setMessage({ text: 'Slot added!', error: false })
       refreshSlots()
-    } catch {
-      setMessage({ text: 'Failed to create slot. Please try again.', error: true })
+    } catch (err) {
+      const text =
+        (isAxiosErrorWithMessage(err) && err.response?.data?.error) ||
+        'Failed to create slot. Please try again.'
+      setMessage({ text, error: true })
     } finally {
       setSubmitting(false)
     }
@@ -129,10 +132,14 @@ export function Volunteer() {
     if (!confirm('Cancel this time slot?')) return
     try {
       await api.cancelSlot(id)
+      setMySlots((prev) => prev.filter((s) => s.id !== id))
     } catch {
-      // endpoint may not exist yet — remove from local state regardless
+      setMessage({
+        text: 'Could not cancel that slot — it may already be booked.',
+        error: true,
+      })
+      refreshSlots()
     }
-    setMySlots((prev) => prev.filter((s) => s.id !== id))
   }
 
   return (
