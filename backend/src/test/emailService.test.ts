@@ -87,6 +87,20 @@ describe('emailService', () => {
       expect(body.htmlContent).toContain('https://meet.google.com/abc-defg-hij')
     })
 
+    it('omits the Meet link line and still sends when meetLink is null', async () => {
+      await sendBookingConfirmationEmail({
+        volunteer: VOLUNTEER,
+        trainee: TRAINEE,
+        startTime: '2026-08-01T10:00:00Z',
+        endTime: '2026-08-01T11:00:00Z',
+        meetLink: null,
+      })
+
+      expect(mockFetch).toHaveBeenCalledTimes(2)
+      const body = JSON.parse(mockFetch.mock.calls[0][1].body)
+      expect(body.htmlContent).not.toContain('null')
+    })
+
     it('uses the configured sender name and email', async () => {
       await sendBookingConfirmationEmail({
         volunteer: VOLUNTEER,

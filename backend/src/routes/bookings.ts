@@ -48,6 +48,14 @@ router.post('/', async (req, res) => {
       [slot.id, traineeId, googleEventId, meetLink, agenda ?? null],
     )
 
+    await sendBookingConfirmationEmail({
+      volunteer: { email: volunteer.email, name: volunteer.name },
+      trainee: { email: trainee.email, name: trainee.name },
+      startTime: slot.start_time,
+      endTime: slot.end_time,
+      meetLink,
+    })
+
     return res.status(201).json({
       bookingId: bookingResult.rows[0].id,
       meetLink,
@@ -69,9 +77,14 @@ router.patch('/:id/cancel', async (req, res) => {
 
   try {
     const bookingResult = await pool.query(
-      `SELECT b.id, b.slot_id, b.trainee_id, b.google_event_id, b.status, ts.volunteer_id
+      `SELECT b.id, b.slot_id, b.trainee_id, b.google_event_id, b.status,
+              ts.volunteer_id, ts.start_time, ts.end_time,
+              v.name AS volunteer_name, v.email AS volunteer_email,
+              t.name AS trainee_name, t.email AS trainee_email
        FROM bookings b
        JOIN time_slots ts ON b.slot_id = ts.id
+       JOIN users v ON v.id = ts.volunteer_id
+       JOIN users t ON t.id = b.trainee_id
        WHERE b.id = $1`,
       [req.params.id],
     )
@@ -99,6 +112,13 @@ router.patch('/:id/cancel', async (req, res) => {
       'available',
       booking.slot_id,
     ])
+
+    await sendBookingCancellationEmail({
+      volunteer: { email: booking.volunteer_email, name: booking.volunteer_name },
+      trainee: { email: booking.trainee_email, name: booking.trainee_name },
+      startTime: booking.start_time,
+      endTime: booking.end_time,
+    })
 
     return res.status(200).json({ success: true })
   } catch (err) {
