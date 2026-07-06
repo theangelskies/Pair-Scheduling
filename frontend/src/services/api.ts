@@ -35,8 +35,8 @@ export const api = {
     const response = await apiClient.post(`/slots/${slotId}/book`, bookingData)
     return response.data
   },
-  createBooking: async (slotId: number, traineeId: number) => {
-    const response = await apiClient.post('/bookings', { slotId, traineeId })
+  createBooking: async (slotId: number, traineeId: number, agenda?: string) => {
+    const response = await apiClient.post('/bookings', { slotId, traineeId, agenda })
     return response.data
   },
   cancelBooking: async (bookingId: number, userId: number) => {

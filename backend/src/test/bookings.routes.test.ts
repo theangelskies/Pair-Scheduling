@@ -68,6 +68,29 @@ describe('POST /api/bookings', () => {
     })
   })
 
+  it('saves the agenda text on the booking when provided', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [SLOT] })
+      .mockResolvedValueOnce({ rows: [VOLUNTEER] })
+      .mockResolvedValueOnce({ rows: [TRAINEE] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ id: 99 }] })
+
+    mockCreateCalendarEvent.mockResolvedValueOnce({
+      googleEventId: 'event-123',
+      meetLink: 'https://meet.google.com/abc-defg-hij',
+    })
+
+    await request(app)
+      .post('/api/bookings')
+      .send({ slotId: SLOT.id, traineeId: TRAINEE.id, agenda: 'Help debugging a React hook' })
+
+    const insertCall = pool.query.mock.calls.find(
+      (call) => typeof call[0] === 'string' && call[0].includes('INSERT INTO bookings'),
+    )
+    expect(insertCall?.[1]).toEqual([SLOT.id, TRAINEE.id, 'event-123', 'https://meet.google.com/abc-defg-hij', 'Help debugging a React hook'])
+  })
+
   it('returns 409 when the slot is already booked', async () => {
     pool.query.mockResolvedValueOnce({ rows: [{ ...SLOT, status: 'booked' }] })
 

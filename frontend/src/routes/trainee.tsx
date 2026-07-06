@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import api from '../services/api'
 import styles from './trainee.module.css'
@@ -13,16 +13,6 @@ type Slot = {
   start_time: string
   end_time: string
   status: string
-}
-
-type BookingRecord = {
-  slotId: number
-  traineeId: number
-  traineeName: string
-}
-
-type ConfirmedBooking = {
-  slot: Slot
 }
 
 function fmtTime(s: string) {
@@ -52,24 +42,6 @@ function groupByDay(slots: Slot[]): [string, Slot[]][] {
   return Array.from(map.entries())
 }
 
-function readBookings(): BookingRecord[] {
-  try {
-    const raw = localStorage.getItem('bookedSlots')
-    return raw ? (JSON.parse(raw) as BookingRecord[]) : []
-  } catch {
-    return []
-  }
-}
-
-function readBookedIds(): Set<number> {
-  return new Set(readBookings().map((b) => b.slotId))
-}
-
-function persistBooking(record: BookingRecord) {
-  const existing = readBookings().filter((b) => b.slotId !== record.slotId)
-  localStorage.setItem('bookedSlots', JSON.stringify([...existing, record]))
-}
-
 function getCurrentUser() {
   try {
     const raw = localStorage.getItem('currentUser')
@@ -80,6 +52,7 @@ function getCurrentUser() {
 }
 
 export function Trainee() {
+  const navigate = useNavigate()
   const currentUser = getCurrentUser()
   const canBook = currentUser?.role === 'trainee'
   const [slots, setSlots] = useState<Slot[]>([])
@@ -87,8 +60,6 @@ export function Trainee() {
   const [error, setError] = useState<string | null>(null)
   const [modalSlot, setModalSlot] = useState<Slot | null>(null)
   const [agenda, setAgenda] = useState('')
-  const [bookedIds, setBookedIds] = useState<Set<number>>(readBookedIds)
-  const [confirmed, setConfirmed] = useState<ConfirmedBooking | null>(null)
 
   useEffect(() => {
     api
@@ -103,43 +74,16 @@ export function Trainee() {
       })
   }, [])
 
-  async function confirmBooking() {
-    if (!modalSlot) return
-    try {
-      await api.bookSlot(modalSlot.id, { agenda })
-    } catch {
-      // endpoint may not exist yet — still mark as booked
-    }
-    persistBooking({
-      slotId: modalSlot.id,
-      traineeId: currentUser?.id ?? 0,
-      traineeName: currentUser?.name ?? 'Trainee',
+  function confirmBooking() {
+    if (!modalSlot || !currentUser) return
+    void navigate({
+      to: '/book',
+      search: {
+        slotId: modalSlot.id,
+        traineeId: currentUser.id,
+        ...(agenda.trim() ? { agenda: agenda.trim() } : {}),
+      },
     })
-    setBookedIds(readBookedIds())
-    setConfirmed({ slot: modalSlot })
-    setModalSlot(null)
-    setAgenda('')
-  }
-
-  if (confirmed) {
-    const { slot } = confirmed
-    return (
-      <div className={styles.confirmWrap}>
-        <div className={styles.confirmCard}>
-          <div className={styles.confirmIcon}>✓</div>
-          <h2>You're booked</h2>
-          <p>Your session has been confirmed.</p>
-          <div className={styles.confirmDetails}>
-            {formatTimeRange(slot.start_time, slot.end_time)} · {formatDay(slot.start_time)}
-            <br />
-            with {slot.volunteer_name}
-          </div>
-          <button className={styles.btnSecondary} onClick={() => setConfirmed(null)}>
-            ← Back to sessions
-          </button>
-        </div>
-      </div>
-    )
   }
 
   if (loading) return <div className={styles.emptyState}>Loading slots…</div>
@@ -163,7 +107,7 @@ export function Trainee() {
           <div className={styles.dayLabel}>{day}</div>
           <div className={styles.slotsGrid}>
             {daySlots.map((slot) => {
-              const isBooked = bookedIds.has(slot.id) || slot.status !== 'available'
+              const isBooked = slot.status !== 'available'
               return (
                 <div
                   key={slot.id}

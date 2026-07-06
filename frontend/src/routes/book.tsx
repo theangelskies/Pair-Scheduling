@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useSearch } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import api from '../services/api'
@@ -6,6 +6,13 @@ import styles from './book.module.css'
 
 export const Route = createFileRoute('/book')({
   component: BookConfirmation,
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { slotId: number; traineeId: number; agenda?: string } => ({
+    slotId: Number(search.slotId),
+    traineeId: Number(search.traineeId),
+    agenda: typeof search.agenda === 'string' ? search.agenda : undefined,
+  }),
 })
 
 type BookingState =
@@ -15,9 +22,7 @@ type BookingState =
   | { status: 'error'; message: string }
 
 function BookConfirmation() {
-  const search = useSearch({ strict: false }) as { slotId?: string; traineeId?: string }
-  const slotId = Number(search.slotId)
-  const traineeId = Number(search.traineeId)
+  const { slotId, traineeId, agenda } = Route.useSearch()
   const [state, setState] = useState<BookingState>({ status: 'loading' })
 
   useEffect(() => {
@@ -29,7 +34,7 @@ function BookConfirmation() {
     let cancelled = false
 
     api
-      .createBooking(slotId, traineeId)
+      .createBooking(slotId, traineeId, agenda)
       .then((data: { meetLink: string }) => {
         if (!cancelled) setState({ status: 'success', meetLink: data.meetLink })
       })
@@ -48,7 +53,7 @@ function BookConfirmation() {
     return () => {
       cancelled = true
     }
-  }, [slotId, traineeId])
+  }, [slotId, traineeId, agenda])
 
   if (state.status === 'loading') {
     return (

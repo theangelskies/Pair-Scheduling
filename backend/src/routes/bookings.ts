@@ -6,7 +6,7 @@ const router = Router()
 
 // POST /api/bookings -> Trainee books an available slot
 router.post('/', async (req, res) => {
-  const { slotId, traineeId } = req.body
+  const { slotId, traineeId, agenda } = req.body
 
   if (!slotId || !traineeId) {
     return res.status(400).json({ error: 'slotId and traineeId are required' })
@@ -41,10 +41,10 @@ router.post('/', async (req, res) => {
     })
 
     const bookingResult = await pool.query(
-      `INSERT INTO bookings (slot_id, trainee_id, google_event_id, google_meet_link)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO bookings (slot_id, trainee_id, google_event_id, google_meet_link, agenda)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING id`,
-      [slot.id, traineeId, googleEventId, meetLink],
+      [slot.id, traineeId, googleEventId, meetLink, agenda ?? null],
     )
 
     return res.status(201).json({
