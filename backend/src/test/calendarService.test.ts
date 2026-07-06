@@ -47,7 +47,7 @@ describe('calendarService', () => {
       })
     })
 
-    it('includes both the volunteer and trainee as attendees', async () => {
+    it('does not include attendees on the event (service account cannot invite without Domain-Wide Delegation)', async () => {
       mockInsert.mockResolvedValueOnce({ data: { id: 'event-123', hangoutLink: 'link' } })
 
       await createCalendarEvent({
@@ -58,12 +58,22 @@ describe('calendarService', () => {
       })
 
       const call = mockInsert.mock.calls[0][0]
-      expect(call.requestBody.attendees).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({ email: VOLUNTEER.email }),
-          expect.objectContaining({ email: TRAINEE.email }),
-        ]),
-      )
+      expect(call.requestBody.attendees).toBeUndefined()
+    })
+
+    it('includes both names in the event summary', async () => {
+      mockInsert.mockResolvedValueOnce({ data: { id: 'event-123', hangoutLink: 'link' } })
+
+      await createCalendarEvent({
+        startTime: '2026-08-01T10:00:00Z',
+        endTime: '2026-08-01T11:00:00Z',
+        volunteer: VOLUNTEER,
+        trainee: TRAINEE,
+      })
+
+      const call = mockInsert.mock.calls[0][0]
+      expect(call.requestBody.summary).toContain(VOLUNTEER.name)
+      expect(call.requestBody.summary).toContain(TRAINEE.name)
     })
 
     it('requests conferenceData to generate a Google Meet link', async () => {
@@ -81,20 +91,6 @@ describe('calendarService', () => {
       expect(call.requestBody.conferenceData.createRequest.conferenceSolutionKey.type).toBe(
         'hangoutsMeet',
       )
-    })
-
-    it('sends invite emails to both attendees using sendUpdates: "all"', async () => {
-      mockInsert.mockResolvedValueOnce({ data: { id: 'event-123', hangoutLink: 'link' } })
-
-      await createCalendarEvent({
-        startTime: '2026-08-01T10:00:00Z',
-        endTime: '2026-08-01T11:00:00Z',
-        volunteer: VOLUNTEER,
-        trainee: TRAINEE,
-      })
-
-      const call = mockInsert.mock.calls[0][0]
-      expect(call.sendUpdates).toBe('all')
     })
 
     it('replaces escaped \\n sequences in the private key with real line breaks', async () => {
@@ -144,12 +140,5 @@ describe('calendarService', () => {
       )
     })
 
-    it('sends cancellation emails to both attendees using sendUpdates: "all"', async () => {
-      mockDelete.mockResolvedValueOnce({})
-
-      await deleteCalendarEvent('event-123')
-
-      expect(mockDelete).toHaveBeenCalledWith(expect.objectContaining({ sendUpdates: 'all' }))
-    })
   })
 })

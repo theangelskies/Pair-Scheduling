@@ -39,16 +39,11 @@ export async function createCalendarEvent(
 
   const { data } = await calendar.events.insert({
     calendarId: 'primary',
-    sendUpdates: 'all',
     conferenceDataVersion: 1,
     requestBody: {
       summary: `Pair Scheduling session: ${volunteer.name} & ${trainee.name}`,
       start: { dateTime: startTime },
       end: { dateTime: endTime },
-      attendees: [
-        { email: volunteer.email, displayName: volunteer.name },
-        { email: trainee.email, displayName: trainee.name },
-      ],
       conferenceData: {
         createRequest: {
           requestId: randomUUID(),
@@ -72,6 +67,5 @@ export async function deleteCalendarEvent(googleEventId: string): Promise<void> 
   await calendar.events.delete({
     calendarId: 'primary',
     eventId: googleEventId,
-    sendUpdates: 'all',
   })
 }
