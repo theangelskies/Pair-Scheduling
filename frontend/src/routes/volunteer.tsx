@@ -245,7 +245,7 @@ export function Volunteer() {
                   {slot.status === 'available' ? 'Available' : 'Booked'}
                 </span>
                 <button className={styles.btnCancel} onClick={() => handleCancel(slot)}>
-                  Cancel
+                  {slot.status === 'booked' ? 'Cancel booking' : 'Delete slot'}
                 </button>
               </div>
             </div>
