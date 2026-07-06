@@ -2,9 +2,23 @@ import express from 'express'
 import { userRoutes } from './routes/users.js'
 import { pool } from './db/pool.js'
 import slotsRouter from './routes/slots.js'
+import authRouter from './routes/auth.js'
+import './auth/passport.js'
+import session from 'express-session'
+import passport from 'passport'
 
 const app = express()
 const PORT: number = Number(process.env.PORT) || 3000
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'dev-secret',
+    resave: false,
+    saveUninitialized: false,
+  }),
+)
+
+app.use(passport.initialize())
+app.use(passport.session())
 
 // ── Middleware ──────────────────────────────────────────────────────────────
 app.use(express.json())
@@ -30,6 +44,8 @@ app.use('/api', (_req, res, next) => {
 app.use('/api/users', userRoutes)
 
 app.use('/api/slots', slotsRouter)
+
+app.use('/api/auth', authRouter)
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
