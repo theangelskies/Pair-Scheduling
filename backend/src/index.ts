@@ -2,6 +2,7 @@ import express from 'express'
 import { userRoutes } from './routes/users.js'
 import { pool } from './db/pool.js'
 import slotsRouter from './routes/slots.js'
+import bookingsRouter from './routes/bookings.js'
 
 const app = express()
 const PORT: number = Number(process.env.PORT) || 3000
@@ -30,6 +31,8 @@ app.use('/api', (_req, res, next) => {
 app.use('/api/users', userRoutes)
 
 app.use('/api/slots', slotsRouter)
+
+app.use('/api/bookings', bookingsRouter)
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
