@@ -35,6 +35,14 @@ export const api = {
     const response = await apiClient.post(`/slots/${slotId}/book`, bookingData)
     return response.data
   },
+  createBooking: async (slotId: number, traineeId: number) => {
+    const response = await apiClient.post('/bookings', { slotId, traineeId })
+    return response.data
+  },
+  cancelBooking: async (bookingId: number, userId: number) => {
+    const response = await apiClient.patch(`/bookings/${bookingId}/cancel`, { userId })
+    return response.data
+  },
 }
 
 export default api
