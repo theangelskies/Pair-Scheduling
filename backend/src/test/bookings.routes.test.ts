@@ -4,14 +4,22 @@ vi.mock('../db/pool.js', () => ({
   pool: { query: vi.fn() },
 }))
 
-const { mockCreateCalendarEvent, mockDeleteCalendarEvent } = vi.hoisted(() => ({
-  mockCreateCalendarEvent: vi.fn(),
-  mockDeleteCalendarEvent: vi.fn(),
-}))
+const { mockCreateCalendarEvent, mockDeleteCalendarEvent, mockSendConfirmation, mockSendCancellation } =
+  vi.hoisted(() => ({
+    mockCreateCalendarEvent: vi.fn(),
+    mockDeleteCalendarEvent: vi.fn(),
+    mockSendConfirmation: vi.fn(),
+    mockSendCancellation: vi.fn(),
+  }))
 
 vi.mock('../services/calendarService.js', () => ({
   createCalendarEvent: mockCreateCalendarEvent,
   deleteCalendarEvent: mockDeleteCalendarEvent,
+}))
+
+vi.mock('../services/emailService.js', () => ({
+  sendBookingConfirmationEmail: mockSendConfirmation,
+  sendBookingCancellationEmail: mockSendCancellation,
 }))
 
 import express from 'express'
@@ -136,6 +144,30 @@ describe('POST /api/bookings', () => {
     })
   })
 
+  it('sends a booking confirmation email to the volunteer and trainee', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [SLOT] })
+      .mockResolvedValueOnce({ rows: [VOLUNTEER] })
+      .mockResolvedValueOnce({ rows: [TRAINEE] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ id: 99 }] })
+
+    mockCreateCalendarEvent.mockResolvedValueOnce({
+      googleEventId: 'event-123',
+      meetLink: 'https://meet.google.com/abc-defg-hij',
+    })
+
+    await request(app).post('/api/bookings').send({ slotId: SLOT.id, traineeId: TRAINEE.id })
+
+    expect(mockSendConfirmation).toHaveBeenCalledWith({
+      volunteer: { email: VOLUNTEER.email, name: VOLUNTEER.name },
+      trainee: { email: TRAINEE.email, name: TRAINEE.name },
+      startTime: SLOT.start_time,
+      endTime: SLOT.end_time,
+      meetLink: 'https://meet.google.com/abc-defg-hij',
+    })
+  })
+
   it('returns 400 when slotId or traineeId is missing', async () => {
     const res = await request(app).post('/api/bookings').send({ slotId: SLOT.id })
 
@@ -152,6 +184,12 @@ describe('PATCH /api/bookings/:id/cancel', () => {
     volunteer_id: VOLUNTEER.id,
     google_event_id: 'event-123',
     status: 'confirmed',
+    start_time: SLOT.start_time,
+    end_time: SLOT.end_time,
+    volunteer_name: VOLUNTEER.name,
+    volunteer_email: VOLUNTEER.email,
+    trainee_name: TRAINEE.name,
+    trainee_email: TRAINEE.email,
   }
 
   beforeEach(() => {
