@@ -216,6 +216,13 @@ describe('PATCH /api/bookings/:id/cancel', () => {
       (call) => typeof call[0] === 'string' && call[0].startsWith('UPDATE time_slots'),
     )
     expect(slotUpdateCall?.[1]).toEqual(['available', BOOKING.slot_id])
+
+    expect(mockSendCancellation).toHaveBeenCalledWith({
+      volunteer: { email: VOLUNTEER.email, name: VOLUNTEER.name },
+      trainee: { email: TRAINEE.email, name: TRAINEE.name },
+      startTime: SLOT.start_time,
+      endTime: SLOT.end_time,
+    })
   })
 
   it('returns 403 when the requesting user is neither the volunteer, trainee, nor an admin', async () => {
@@ -229,6 +236,7 @@ describe('PATCH /api/bookings/:id/cancel', () => {
 
     expect(res.status).toBe(403)
     expect(mockDeleteCalendarEvent).not.toHaveBeenCalled()
+    expect(mockSendCancellation).not.toHaveBeenCalled()
   })
 
   it('allows cancellation when the requesting user is an admin', async () => {
