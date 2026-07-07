@@ -45,7 +45,7 @@ app.use('/api/users', userRoutes)
 
 app.use('/api/slots', slotsRouter)
 
-app.use('/api/auth', authRouter)
+app.use('/auth', authRouter)
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
