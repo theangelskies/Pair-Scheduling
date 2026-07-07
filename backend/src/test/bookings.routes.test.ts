@@ -163,7 +163,12 @@ describe('POST /api/bookings', () => {
     const insertCall = pool.query.mock.calls.find(
       (call) => typeof call[0] === 'string' && call[0].includes('INSERT INTO bookings'),
     )
-    expect(insertCall?.[1]).toEqual([SLOT.id, TRAINEE.id, 'https://meet.jit.si/pair-scheduling-abc123', 'Help debugging a React hook'])
+    expect(insertCall?.[1]).toEqual([
+      SLOT.id,
+      TRAINEE.id,
+      'https://meet.jit.si/pair-scheduling-abc123',
+      'Help debugging a React hook',
+    ])
   })
 
   it('returns 409 when the slot is already booked', async () => {
@@ -281,9 +286,7 @@ describe('PATCH /api/bookings/:id/cancel', () => {
       .mockResolvedValueOnce({ rows: [{ role: 'trainee' }] })
       .mockResolvedValueOnce({ rows: [] }) // ROLLBACK
 
-    const res = await request(app)
-      .patch(`/api/bookings/${BOOKING.id}/cancel`)
-      .send({ userId: 42 })
+    const res = await request(app).patch(`/api/bookings/${BOOKING.id}/cancel`).send({ userId: 42 })
 
     expect(res.status).toBe(403)
     expect(mockSendCancellation).not.toHaveBeenCalled()
@@ -298,9 +301,7 @@ describe('PATCH /api/bookings/:id/cancel', () => {
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [] }) // COMMIT
 
-    const res = await request(app)
-      .patch(`/api/bookings/${BOOKING.id}/cancel`)
-      .send({ userId: 7 })
+    const res = await request(app).patch(`/api/bookings/${BOOKING.id}/cancel`).send({ userId: 7 })
 
     expect(res.status).toBe(200)
   })
@@ -311,9 +312,7 @@ describe('PATCH /api/bookings/:id/cancel', () => {
       .mockResolvedValueOnce({ rows: [] }) // fetch booking (not found)
       .mockResolvedValueOnce({ rows: [] }) // ROLLBACK
 
-    const res = await request(app)
-      .patch('/api/bookings/999/cancel')
-      .send({ userId: TRAINEE.id })
+    const res = await request(app).patch('/api/bookings/999/cancel').send({ userId: TRAINEE.id })
 
     expect(res.status).toBe(404)
   })

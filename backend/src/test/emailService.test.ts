@@ -6,7 +6,10 @@ const { mockFetch } = vi.hoisted(() => ({
 
 vi.stubGlobal('fetch', mockFetch)
 
-import { sendBookingConfirmationEmail, sendBookingCancellationEmail } from '../services/emailService.js'
+import {
+  sendBookingConfirmationEmail,
+  sendBookingCancellationEmail,
+} from '../services/emailService.js'
 
 const VOLUNTEER = { email: 'volunteer@example.com', name: 'Alice García' }
 const TRAINEE = { email: 'trainee@example.com', name: 'Carmen Liu' }

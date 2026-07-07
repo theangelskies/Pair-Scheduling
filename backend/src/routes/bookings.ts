@@ -1,7 +1,10 @@
 import { Router } from 'express'
 import { pool } from '../db/pool.js'
 import { createMeetingLink } from '../services/calendarService.js'
-import { sendBookingConfirmationEmail, sendBookingCancellationEmail } from '../services/emailService.js'
+import {
+  sendBookingConfirmationEmail,
+  sendBookingCancellationEmail,
+} from '../services/emailService.js'
 
 const router = Router()
 
