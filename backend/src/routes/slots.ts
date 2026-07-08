@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { pool } from '../db/pool.js' // Adjust path based on your template setup
+import { pool } from '../db/pool.js'
 
 const router = Router()
 
