@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import axios from 'axios'
 import { useEffect, useState } from 'react'
 import api from '../services/api'
 import styles from './volunteer.module.css'
@@ -14,12 +15,8 @@ type ApiSlot = {
   start_time: string
   end_time: string
   status: string
-}
-
-type BookingRecord = {
-  slotId: number
-  traineeId: number
-  traineeName: string
+  trainee_name: string | null
+  booking_id: number | null
 }
 
 type MySlot = {
@@ -28,6 +25,7 @@ type MySlot = {
   date: string
   status: 'available' | 'booked'
   bookedBy?: string
+  bookingId?: number
 }
 
 function fmtTime(s: string) {
@@ -57,16 +55,6 @@ function getCurrentUser() {
   }
 }
 
-function readBookings(): Map<number, string> {
-  try {
-    const raw = localStorage.getItem('bookedSlots')
-    const records = raw ? (JSON.parse(raw) as BookingRecord[]) : []
-    return new Map(records.map((r) => [r.slotId, r.traineeName]))
-  } catch {
-    return new Map()
-  }
-}
-
 export function Volunteer() {
   const currentUser = getCurrentUser()
   const canCreateSlot = currentUser?.role === 'volunteer'
@@ -79,24 +67,20 @@ export function Volunteer() {
   const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null)
 
   function apiSlotsToMySlots(data: ApiSlot[]): MySlot[] {
-    const bookings = readBookings()
-    return data
-      .filter((s) => s.volunteer_id === currentUser?.id)
-      .map((s) => {
-        const traineeName = bookings.get(s.id)
-        return {
-          id: s.id,
-          timeRange: formatTimeRange(s.start_time, s.end_time),
-          date: formatDay(s.start_time),
-          status: traineeName ? ('booked' as const) : ('available' as const),
-          bookedBy: traineeName,
-        }
-      })
+    return data.map((s) => ({
+      id: s.id,
+      timeRange: formatTimeRange(s.start_time, s.end_time),
+      date: formatDay(s.start_time),
+      status: s.status === 'available' ? ('available' as const) : ('booked' as const),
+      bookedBy: s.trainee_name ?? undefined,
+      bookingId: s.booking_id ?? undefined,
+    }))
   }
 
   function refreshSlots() {
+    if (!currentUser) return
     api
-      .getAvailableSlots()
+      .getMySlots(currentUser.id)
       .then((data: ApiSlot[]) => {
         setMySlots(apiSlotsToMySlots(data))
       })
@@ -138,21 +122,40 @@ export function Volunteer() {
       setDate('')
       setMessage({ text: 'Slot added!', error: false })
       refreshSlots()
-    } catch {
-      setMessage({ text: 'Failed to create slot. Please try again.', error: true })
+    } catch (err) {
+      const text =
+        (axios.isAxiosError(err) && err.response?.data?.error) ||
+        'Failed to create slot. Please try again.'
+      setMessage({ text, error: true })
     } finally {
       setSubmitting(false)
     }
   }
 
-  async function handleCancel(id: number) {
+  async function handleCancel(slot: MySlot) {
+    if (slot.status === 'booked') {
+      if (!currentUser || !confirm('Cancel this booked session? The trainee will be notified.'))
+        return
+      try {
+        await api.cancelBooking(slot.bookingId!, currentUser.id)
+        refreshSlots()
+      } catch {
+        setMessage({ text: 'Could not cancel that booking. Please try again.', error: true })
+      }
+      return
+    }
+
     if (!confirm('Cancel this time slot?')) return
     try {
-      await api.cancelSlot(id)
+      await api.cancelSlot(slot.id)
+      setMySlots((prev) => prev.filter((s) => s.id !== slot.id))
     } catch {
-      // endpoint may not exist yet — remove from local state regardless
+      setMessage({
+        text: 'Could not cancel that slot — it may already be booked.',
+        error: true,
+      })
+      refreshSlots()
     }
-    setMySlots((prev) => prev.filter((s) => s.id !== id))
   }
 
   return (
@@ -241,11 +244,9 @@ export function Volunteer() {
                 >
                   {slot.status === 'available' ? 'Available' : 'Booked'}
                 </span>
-                {slot.status === 'available' && (
-                  <button className={styles.btnCancel} onClick={() => handleCancel(slot.id)}>
-                    Cancel
-                  </button>
-                )}
+                <button className={styles.btnCancel} onClick={() => handleCancel(slot)}>
+                  {slot.status === 'booked' ? 'Cancel booking' : 'Delete slot'}
+                </button>
               </div>
             </div>
           ))}

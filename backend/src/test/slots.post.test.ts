@@ -4,8 +4,12 @@ import app from '../index.js'
 
 describe('POST /api/slots', () => {
   it('should create a valid slot', async () => {
-    const start = new Date(Date.now() + 60 * 60 * 1000)
-    const end = new Date(Date.now() + 2 * 60 * 60 * 1000)
+    // Far-future, randomized window so this doesn't collide with the many
+    // slots this same integration test has accumulated for volunteer_id 1
+    // over past runs (this test hits the real DB, not a mock).
+    const daysOut = 60 + Math.floor(Math.random() * 300)
+    const start = new Date(Date.now() + daysOut * 24 * 60 * 60 * 1000)
+    const end = new Date(start.getTime() + 60 * 60 * 1000)
 
     const payload = {
       volunteer_id: 1,

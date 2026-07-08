@@ -7,11 +7,36 @@ const router = Router()
 router.get('/available', async (_req, res) => {
   try {
     const result = await pool.query(
-      `SELECT ts.*, u.name as volunteer_name 
-       FROM time_slots ts 
-       JOIN users u ON ts.volunteer_id = u.id 
+      `SELECT ts.*, u.name as volunteer_name
+       FROM time_slots ts
+       JOIN users u ON ts.volunteer_id = u.id
        WHERE ts.status = 'available' AND ts.start_time > NOW()
        ORDER BY ts.start_time ASC`,
+    )
+    res.json(result.rows)
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Database fetch failed' })
+  }
+})
+
+// GET /api/slots/mine?volunteerId=X -> A volunteer's own slots, booked or not
+router.get('/mine', async (req, res) => {
+  const { volunteerId } = req.query
+
+  if (!volunteerId) {
+    return res.status(400).json({ error: 'volunteerId is required' })
+  }
+
+  try {
+    const result = await pool.query(
+      `SELECT ts.*, t.name AS trainee_name, b.id AS booking_id
+       FROM time_slots ts
+       LEFT JOIN bookings b ON b.slot_id = ts.id AND b.status = 'confirmed'
+       LEFT JOIN users t ON t.id = b.trainee_id
+       WHERE ts.volunteer_id = $1
+       ORDER BY ts.start_time ASC`,
+      [volunteerId],
     )
     res.json(result.rows)
   } catch (err) {
@@ -57,11 +82,23 @@ router.post('/', async (req, res) => {
       })
     }
 
-    // 5. defaults
+    // 5. reject overlapping slots for the same volunteer
+    const overlapping = await pool.query(
+      `SELECT id FROM time_slots
+       WHERE volunteer_id = $1 AND start_time < $3 AND end_time > $2`,
+      [volunteer_id, start, end],
+    )
+    if (overlapping.rows.length > 0) {
+      return res.status(409).json({
+        error: 'You already have a slot that overlaps this time range',
+      })
+    }
+
+    // 6. defaults
     const recurring = is_recurring ?? false
     const noticeHours = minimum_notice_hours ?? 24
 
-    // 6. insert into DB
+    // 7. insert into DB
     const result = await pool.query(
       `INSERT INTO time_slots 
       (volunteer_id, start_time, end_time, is_recurring, minimum_notice_hours) 
@@ -78,6 +115,25 @@ router.post('/', async (req, res) => {
       `\n[${new Date().toISOString()}] POST /api/slots error:\n${String(err)}\n${(err as Error)?.stack}\n`,
     )
     return res.status(500).json({ error: 'Failed to save slot', details: String(err) })
+  }
+})
+
+// DELETE /api/slots/:id -> Volunteer cancels an available (unbooked) slot
+router.delete('/:id', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `DELETE FROM time_slots WHERE id = $1 AND status = 'available' RETURNING id`,
+      [req.params.id],
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(409).json({ error: 'Slot not found or already booked' })
+    }
+
+    return res.status(200).json({ success: true })
+  } catch (err) {
+    console.error(err)
+    return res.status(500).json({ error: 'Failed to cancel slot' })
   }
 })
 
