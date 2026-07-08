@@ -1,0 +1,290 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
+
+.page {
+  --bg: #f3f4f8;
+  --surface: #ffffff;
+  --ink: #1b1d2a;
+  --muted: #5b5f73;
+  --line: #e1e3ec;
+  --volunteer: #e6822a;
+  --volunteer-tint: #fdf0e2;
+  --trainee: #1f9e8b;
+  --trainee-tint: #e3f5f2;
+
+  display: flex;
+  flex-direction: column;
+  gap: 72px;
+  padding: 64px 24px 80px;
+  max-width: 880px;
+  margin: 0 auto;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: var(--ink);
+}
+
+/* ---------- Hero ---------- */
+
+.hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  padding-top: 8px;
+}
+
+.heroMark {
+  position: absolute;
+  top: -34px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 220px;
+  height: 140px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.venn {
+  width: 100%;
+  height: 100%;
+}
+
+.vennVolunteer,
+.vennTrainee {
+  opacity: 0.16;
+  mix-blend-mode: multiply;
+  animation: venn-in 0.7s ease-out both;
+}
+
+.vennVolunteer {
+  fill: var(--volunteer);
+}
+
+.vennTrainee {
+  fill: var(--trainee);
+  animation-delay: 0.12s;
+}
+
+@keyframes venn-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 0.16;
+    transform: scale(1);
+  }
+}
+
+.eyebrow {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.title {
+  position: relative;
+  z-index: 1;
+  margin: 4px 0 0;
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 48px;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  position: relative;
+  z-index: 1;
+  margin: 6px 0 0;
+  white-space: nowrap;
+  font-size: 16px;
+  color: var(--muted);
+}
+
+/* ---------- Roles ---------- */
+
+.rolesSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.rolesRow {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.roleCard {
+  flex: 1;
+  min-width: 260px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 28px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-top: 3px solid transparent;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.roleCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(27, 29, 42, 0.06);
+}
+
+.roleVolunteer {
+  border-top-color: var(--volunteer);
+}
+
+.roleTrainee {
+  border-top-color: var(--trainee);
+}
+
+.roleTag {
+  align-self: flex-start;
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 20px;
+}
+
+.roleVolunteer .roleTag {
+  color: var(--volunteer);
+}
+
+.roleTrainee .roleTag {
+  color: var(--trainee);
+}
+
+.roleText {
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.roleList {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+/* ---------- How it works ---------- */
+
+.howItWorks {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.sectionTitle {
+  margin: 0;
+  text-align: center;
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 24px;
+}
+
+.stepsRow {
+  position: relative;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.stepsRow::before {
+  content: '';
+  position: absolute;
+  top: 19px;
+  left: 6%;
+  right: 6%;
+  height: 1px;
+  background: var(--line);
+  z-index: 0;
+}
+
+.stepCard {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stepNumber {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.stepTitle {
+  margin: 4px 0 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.stepText {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+/* ---------- Responsive & motion ---------- */
+
+@media (max-width: 560px) {
+  .title {
+    font-size: 36px;
+  }
+
+  .subtitle {
+    white-space: normal;
+  }
+
+  .heroMark {
+    width: 170px;
+    height: 110px;
+    top: -22px;
+  }
+
+  .stepsRow::before {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vennVolunteer,
+  .vennTrainee {
+    animation: none;
+    opacity: 0.16;
+  }
+
+  .roleCard {
+    transition: none;
+  }
+}

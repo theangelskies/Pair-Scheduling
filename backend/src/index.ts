@@ -6,6 +6,7 @@ import authRouter from './routes/auth.js'
 import './auth/passport.js'
 import session from 'express-session'
 import passport from 'passport'
+import bookingsRouter from './routes/bookings.js'
 
 const app = express()
 const PORT: number = Number(process.env.PORT) || 3000
@@ -46,6 +47,7 @@ app.use('/api/users', userRoutes)
 app.use('/api/slots', slotsRouter)
 
 app.use('/auth', authRouter)
+app.use('/api/bookings', bookingsRouter)
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })

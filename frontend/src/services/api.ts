@@ -21,6 +21,10 @@ export const api = {
     const response = await apiClient.get('/slots/available')
     return response.data
   },
+  getMySlots: async (volunteerId: number) => {
+    const response = await apiClient.get('/slots/mine', { params: { volunteerId } })
+    return response.data
+  },
   createSlot: async (slotData: Record<string, unknown>) => {
     const response = await apiClient.post('/slots', slotData)
     return response.data
@@ -33,6 +37,18 @@ export const api = {
   // Booking Management
   bookSlot: async (slotId: number, bookingData: Record<string, unknown>) => {
     const response = await apiClient.post(`/slots/${slotId}/book`, bookingData)
+    return response.data
+  },
+  createBooking: async (slotId: number, traineeId: number, agenda?: string) => {
+    const response = await apiClient.post('/bookings', { slotId, traineeId, agenda })
+    return response.data
+  },
+  getMyBookings: async (traineeId: number) => {
+    const response = await apiClient.get('/bookings', { params: { traineeId } })
+    return response.data
+  },
+  cancelBooking: async (bookingId: number, userId: number) => {
+    const response = await apiClient.patch(`/bookings/${bookingId}/cancel`, { userId })
     return response.data
   },
 }
