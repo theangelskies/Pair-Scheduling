@@ -3,6 +3,8 @@ import passport from 'passport'
 
 const router = Router()
 
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173'
+
 router.get('/google', (req, res, next) => {
   const role = req.query.role
 
@@ -15,17 +17,17 @@ router.get('/google', (req, res, next) => {
 router.get(
   '/google/callback',
   passport.authenticate('google', {
-    failureRedirect: 'http://localhost:5173/login',
+    failureRedirect: `${FRONTEND_URL}/login`,
   }),
   (req, res) => {
     const role = req.query.state
 
     if (role === 'volunteer') {
-      res.redirect('http://localhost:5173/volunteer')
+      res.redirect(`${FRONTEND_URL}/volunteer`)
       return
     }
 
-    res.redirect('http://localhost:5173/trainee')
+    res.redirect(`${FRONTEND_URL}/trainee`)
   },
 )
 
