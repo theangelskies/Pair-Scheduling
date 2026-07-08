@@ -89,11 +89,10 @@ function AboutPage() {
               <span className={styles.contributorBadge}>Special Contribution</span>
               <p className={styles.memberRole}>{person.role}</p>
               <h3 className={styles.memberName}>{person.name}</h3>
-             </div>
-        ))}
+            </div>
+          ))}
         </div>
       </div>
     </div>
   )
 }
-

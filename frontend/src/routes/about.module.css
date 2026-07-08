@@ -64,7 +64,9 @@
   align-items: center;
   gap: 10px;
   text-align: center;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .memberCard:hover {
@@ -117,7 +119,9 @@
   border-radius: 16px;
   padding: 24px 20px 20px;
   text-align: center;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .contributorCard:hover {
