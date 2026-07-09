@@ -45,9 +45,7 @@ function getJwks() {
     throw new Error('SUPABASE_PROJECT or SUPABASE_URL is required for JWT verification')
   }
 
-  jwks = createRemoteJWKSet(
-    new URL(`https://${project}.supabase.co/auth/v1/.well-known/jwks.json`),
-  )
+  jwks = createRemoteJWKSet(new URL(`https://${project}.supabase.co/auth/v1/.well-known/jwks.json`))
   return jwks
 }
 

@@ -22,7 +22,12 @@ describe('booking flow', () => {
   beforeEach(() => {
     localStorage.setItem(
       'currentUser',
-      JSON.stringify({ id: 1, name: 'Test Trainee', email: 'trainee@example.com', role: 'trainee' }),
+      JSON.stringify({
+        id: 1,
+        name: 'Test Trainee',
+        email: 'trainee@example.com',
+        role: 'trainee',
+      }),
     )
     vi.mocked(api.getMyBookings).mockResolvedValue([])
   })
