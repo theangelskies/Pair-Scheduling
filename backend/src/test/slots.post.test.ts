@@ -1,6 +1,11 @@
 import request from 'supertest'
 import { describe, it, expect } from 'vitest'
-import app from '../index.js'
+import express from 'express'
+import slotsRouter from '../routes/slots.js'
+
+const app = express()
+app.use(express.json())
+app.use('/api/slots', slotsRouter)
 
 describe('POST /api/slots', () => {
   it('should create a valid slot', async () => {

@@ -2,24 +2,12 @@ import express from 'express'
 import { userRoutes } from './routes/users.js'
 import { pool } from './db/pool.js'
 import slotsRouter from './routes/slots.js'
-import authRouter from './routes/auth.js'
-import './auth/passport.js'
-import session from 'express-session'
-import passport from 'passport'
 import bookingsRouter from './routes/bookings.js'
+import profileRouter from './routes/profile.js'
+import { requireAuth, requireProfile } from './auth/supabase.js'
 
 const app = express()
 const PORT: number = Number(process.env.PORT) || 3000
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || 'dev-secret',
-    resave: false,
-    saveUninitialized: false,
-  }),
-)
-
-app.use(passport.initialize())
-app.use(passport.session())
 
 // ── Middleware ──────────────────────────────────────────────────────────────
 app.use(express.json())
@@ -28,10 +16,14 @@ app.use(express.json())
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173'
 app.use((_req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', FRONTEND_URL)
-  res.setHeader('Access-Control-Allow-Headers', '*')
+  res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type')
   res.setHeader('Access-Control-Allow-Methods', '*')
   // res.setHeader('Referer-Policy', 'no-referrer')
   next()
+})
+
+app.options('/{*path}', (_req, res) => {
+  res.sendStatus(204)
 })
 
 // Never let the browser cache API responses — avoids stale data after DB resets
@@ -42,12 +34,10 @@ app.use('/api', (_req, res, next) => {
 
 // ── Routes ──────────────────────────────────────────────────────────────────
 // Mount route files here. Keep index.ts clean – one line per feature.
-app.use('/api/users', userRoutes)
-
-app.use('/api/slots', slotsRouter)
-
-app.use('/auth', authRouter)
-app.use('/api/bookings', bookingsRouter)
+app.use('/api/profile', requireAuth, profileRouter)
+app.use('/api/users', requireAuth, requireProfile, userRoutes)
+app.use('/api/slots', requireAuth, requireProfile, slotsRouter)
+app.use('/api/bookings', requireAuth, requireProfile, bookingsRouter)
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
