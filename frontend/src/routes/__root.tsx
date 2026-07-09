@@ -17,17 +17,27 @@ function useCurrentUser() {
   })
 
   useEffect(() => {
-    function onStorage(e: StorageEvent) {
-      if (e.key === 'currentUser') {
-        try {
-          setUser(e.newValue ? JSON.parse(e.newValue) : null)
-        } catch {
-          setUser(null)
-        }
+    function syncUser() {
+      try {
+        const raw = localStorage.getItem('currentUser')
+        setUser(raw ? JSON.parse(raw) : null)
+      } catch {
+        setUser(null)
       }
     }
+
+    function onStorage(e: StorageEvent) {
+      if (e.key === 'currentUser') {
+        syncUser()
+      }
+    }
+
     window.addEventListener('storage', onStorage)
-    return () => window.removeEventListener('storage', onStorage)
+    window.addEventListener('currentUserChanged', syncUser)
+    return () => {
+      window.removeEventListener('storage', onStorage)
+      window.removeEventListener('currentUserChanged', syncUser)
+    }
   }, [])
 
   return { user, setUser }

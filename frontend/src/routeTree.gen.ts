@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as VolunteerRouteImport } from './routes/volunteer'
 import { Route as UsersRouteImport } from './routes/users'
 import { Route as TraineeRouteImport } from './routes/trainee'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as BookRouteImport } from './routes/book'
 import { Route as AboutRouteImport } from './routes/about'
@@ -31,6 +32,11 @@ const UsersRoute = UsersRouteImport.update({
 const TraineeRoute = TraineeRouteImport.update({
   id: '/trainee',
   path: '/trainee',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/book': typeof BookRoute
   '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
   '/trainee': typeof TraineeRoute
   '/users': typeof UsersRoute
   '/volunteer': typeof VolunteerRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/book': typeof BookRoute
   '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
   '/trainee': typeof TraineeRoute
   '/users': typeof UsersRoute
   '/volunteer': typeof VolunteerRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/book': typeof BookRoute
   '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
   '/trainee': typeof TraineeRoute
   '/users': typeof UsersRoute
   '/volunteer': typeof VolunteerRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/book'
     | '/login'
+    | '/onboarding'
     | '/trainee'
     | '/users'
     | '/volunteer'
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/book'
     | '/login'
+    | '/onboarding'
     | '/trainee'
     | '/users'
     | '/volunteer'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/book'
     | '/login'
+    | '/onboarding'
     | '/trainee'
     | '/users'
     | '/volunteer'
@@ -128,6 +140,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   BookRoute: typeof BookRoute
   LoginRoute: typeof LoginRoute
+  OnboardingRoute: typeof OnboardingRoute
   TraineeRoute: typeof TraineeRoute
   UsersRoute: typeof UsersRoute
   VolunteerRoute: typeof VolunteerRoute
@@ -155,6 +168,13 @@ declare module '@tanstack/react-router' {
       path: '/trainee'
       fullPath: '/trainee'
       preLoaderRoute: typeof TraineeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -200,6 +220,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   BookRoute: BookRoute,
   LoginRoute: LoginRoute,
+  OnboardingRoute: OnboardingRoute,
   TraineeRoute: TraineeRoute,
   UsersRoute: UsersRoute,
   VolunteerRoute: VolunteerRoute,

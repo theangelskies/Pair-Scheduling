@@ -21,6 +21,11 @@ apiClient.interceptors.request.use(async (config) => {
   return config
 })
 export const api = {
+  createProfile: async (profileData: { role: 'trainee' | 'volunteer' }) => {
+    const response = await apiClient.post('/profile/create', profileData)
+    return response.data
+  },
+
   // Users
   getUsers: async () => {
     const response = await apiClient.get('/users')
