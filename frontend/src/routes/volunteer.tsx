@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import axios from 'axios'
 import { useEffect, useState } from 'react'
+import { useAuth } from '../context/AuthContext'
 import api from '../services/api'
 import styles from './volunteer.module.css'
 
@@ -56,6 +57,7 @@ function getCurrentUser() {
 }
 
 export function Volunteer() {
+  const { session, loading: authLoading } = useAuth()
   const currentUser = getCurrentUser()
   const canCreateSlot = currentUser?.role === 'volunteer'
   const [mySlots, setMySlots] = useState<MySlot[]>([])
@@ -88,6 +90,12 @@ export function Volunteer() {
         // silently ignore — show whatever we have
       })
   }
+
+  useEffect(() => {
+    if (!authLoading && !session) {
+      window.location.href = '/login'
+    }
+  }, [authLoading, session])
 
   useEffect(() => {
     refreshSlots()
@@ -156,6 +164,10 @@ export function Volunteer() {
       })
       refreshSlots()
     }
+  }
+
+  if (authLoading) {
+    return <div className={styles.page}>Checking sign in...</div>
   }
 
   return (

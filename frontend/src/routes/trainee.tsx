@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import api from '../services/api'
 import styles from './trainee.module.css'
-
+import { useAuth } from '../context/AuthContext'
 export const Route = createFileRoute('/trainee')({
   component: Trainee,
 })
@@ -62,6 +62,7 @@ function getCurrentUser() {
 
 export function Trainee() {
   const navigate = useNavigate()
+  const { session, loading: authLoading } = useAuth()
   const currentUser = getCurrentUser()
   const canBook = currentUser?.role === 'trainee'
   const [slots, setSlots] = useState<Slot[]>([])
@@ -95,10 +96,10 @@ export function Trainee() {
   }
 
   useEffect(() => {
-    refreshSlots()
-    refreshBookings()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    if (!authLoading && !session) {
+      void navigate({ to: '/login' })
+    }
+  }, [authLoading, session, navigate])
 
   async function handleCancelBooking(bookingId: number) {
     if (!currentUser || !confirm('Cancel this booking?')) return
@@ -122,7 +123,9 @@ export function Trainee() {
       },
     })
   }
-
+  if (authLoading) {
+    return <div className={styles.emptyState}>Checking sign in...</div>
+  }
   if (loading) return <div className={styles.emptyState}>Loading slots…</div>
   if (error) return <div className={styles.emptyState}>Error: {error}</div>
 
