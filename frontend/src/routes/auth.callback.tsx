@@ -1,7 +1,13 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { supabase } from '../services/supabaseClient'
-import { goToRoleHome, isOnboardingResponse, loadCurrentUser } from '../services/profile'
+import api from '../services/api'
+import {
+  goToRoleHome,
+  isOnboardingResponse,
+  loadCurrentUser,
+  saveCurrentUser,
+} from '../services/profile'
 import styles from './login.module.css'
 
 export const Route = createFileRoute('/auth/callback')({
@@ -14,6 +20,11 @@ function readHashError(): string | null {
   const description = params.get('error_description')
   if (description) return description.replace(/\+/g, ' ')
   return params.get('error')
+}
+
+function readRequestedRole(metadata: Record<string, unknown> | undefined) {
+  const role = metadata?.role
+  return role === 'trainee' || role === 'volunteer' ? role : null
 }
 
 function AuthCallback() {
@@ -34,6 +45,24 @@ function AuthCallback() {
         const user = await loadCurrentUser(data.session.user.email)
 
         if (isOnboardingResponse(user)) {
+          // The role picked on the login page ("Log in as Trainee/Volunteer")
+          // rides along as auth metadata — use it to provision a first-time
+          // profile automatically, without a separate manual onboarding step.
+          const requestedRole = readRequestedRole(data.session.user.user_metadata)
+
+          if (requestedRole) {
+            try {
+              const created = await api.createProfile({ role: requestedRole })
+              if (created.user) {
+                saveCurrentUser(created.user)
+                goToRoleHome(navigate, created.user.role)
+                return
+              }
+            } catch {
+              // fall through to manual onboarding if auto-provisioning fails
+            }
+          }
+
           void navigate({ to: '/onboarding' })
           return
         }
