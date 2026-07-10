@@ -1,7 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { UserCard } from '../components/UserCard'
 import { api } from '../services/api'
+import { isOnboardingResponse } from '../services/profile'
+import { useAuth } from '../context/AuthContext'
 
 type User = { id: number; name: string; role: string }
 
@@ -12,14 +14,34 @@ export const Route = createFileRoute('/users')({
 })
 
 function UsersPage() {
+  const navigate = useNavigate()
+  const { session, loading: authLoading } = useAuth()
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (authLoading) return
+
+    if (!session) {
+      void navigate({ to: '/login' })
+      return
+    }
+
     api
       .getUsers()
-      .then((data) => {
+      .then((data: User[] | unknown) => {
+        if (isOnboardingResponse(data)) {
+          void navigate({ to: '/onboarding' })
+          return
+        }
+
+        if (!Array.isArray(data)) {
+          setError('Could not load users.')
+          setLoading(false)
+          return
+        }
+
         setUsers(data)
         setLoading(false)
       })
@@ -27,8 +49,9 @@ function UsersPage() {
         setError(err.message)
         setLoading(false)
       })
-  }, [])
+  }, [authLoading, session, navigate])
 
+  if (authLoading) return <p>Checking sign in...</p>
   if (loading) return <p>Loading users…</p>
   if (error) return <p style={{ color: 'red' }}>Error: {error}</p>
 
