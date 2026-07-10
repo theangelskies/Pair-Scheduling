@@ -30,7 +30,18 @@ function UsersPage() {
 
     api
       .getUsers()
-      .then((data) => {
+      .then((data: User[] | unknown) => {
+        if (isOnboardingResponse(data)) {
+          void navigate({ to: '/onboarding' })
+          return
+        }
+
+        if (!Array.isArray(data)) {
+          setError('Could not load users.')
+          setLoading(false)
+          return
+        }
+
         setUsers(data)
         setLoading(false)
       })
