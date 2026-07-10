@@ -54,7 +54,11 @@ function AuthCallback() {
         <div className={styles.card}>
           <h2>Sign in link expired</h2>
           <p>{error}</p>
-          <Link to="/login" className={styles.btnPrimary}>
+          <Link
+            to="/login"
+            className={styles.btnPrimary}
+            style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}
+          >
             Back to login
           </Link>
         </div>
