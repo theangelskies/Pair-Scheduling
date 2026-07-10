@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../services/supabaseClient'
 import api from '../services/api'
 import {
+  consumePendingRole,
   goToRoleHome,
   isOnboardingResponse,
   loadCurrentUser,
@@ -20,11 +21,6 @@ function readHashError(): string | null {
   const description = params.get('error_description')
   if (description) return description.replace(/\+/g, ' ')
   return params.get('error')
-}
-
-function readRequestedRole(metadata: Record<string, unknown> | undefined) {
-  const role = metadata?.role
-  return role === 'trainee' || role === 'volunteer' ? role : null
 }
 
 function AuthCallback() {
@@ -45,10 +41,11 @@ function AuthCallback() {
         const user = await loadCurrentUser(data.session.user.email)
 
         if (isOnboardingResponse(user)) {
-          // The role picked on the login page ("Log in as Trainee/Volunteer")
-          // rides along as auth metadata — use it to provision a first-time
-          // profile automatically, without a separate manual onboarding step.
-          const requestedRole = readRequestedRole(data.session.user.user_metadata)
+          // The role picked on the login page ("Log in with Google as Trainee/Volunteer")
+          // rides along in localStorage across the Google redirect — use it to
+          // provision a first-time profile automatically, without a separate
+          // manual onboarding step.
+          const requestedRole = consumePendingRole()
 
           if (requestedRole) {
             try {
@@ -81,7 +78,7 @@ function AuthCallback() {
     return (
       <div className={styles.wrap}>
         <div className={styles.card}>
-          <h2>Sign in link expired</h2>
+          <h2>Sign in failed</h2>
           <p>{error}</p>
           <Link
             to="/login"

@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { supabase } from '../services/supabaseClient'
+import { savePendingRole } from '../services/profile'
 import styles from './login.module.css'
 
 export const Route = createFileRoute('/login')({
@@ -10,67 +11,50 @@ export const Route = createFileRoute('/login')({
 type Role = 'trainee' | 'volunteer'
 
 export function Login() {
-  const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
-  const [sending, setSending] = useState<Role | null>(null)
+  const [redirecting, setRedirecting] = useState<Role | null>(null)
 
-  async function sendMagicLink(role: Role) {
-    if (!email.trim()) {
-      setMessage('Please enter your email address.')
-      return
-    }
-
+  async function loginWithGoogle(role: Role) {
     setMessage('')
-    setSending(role)
+    setRedirecting(role)
+    savePendingRole(role)
 
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-        data: { role },
+        redirectTo: `${window.location.origin}/auth/callback`,
       },
     })
 
-    setSending(null)
-
     if (error) {
+      setRedirecting(null)
       setMessage(error.message)
-      return
     }
-
-    setMessage('Check your email for the magic link.')
+    // On success the browser navigates away to Google, so there's nothing more to do here.
   }
 
   return (
     <div className={styles.wrap}>
       <div className={styles.card}>
         <h2>Sign in</h2>
-        <p>Enter your email, then choose how you want to continue.</p>
-
-        <input
-          className={styles.fieldInput}
-          type="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-        />
+        <p>Choose how you want to continue.</p>
 
         <button
           className={styles.btnPrimary}
           type="button"
-          onClick={() => sendMagicLink('trainee')}
-          disabled={sending !== null}
+          onClick={() => loginWithGoogle('trainee')}
+          disabled={redirecting !== null}
         >
-          {sending === 'trainee' ? 'Sending...' : 'Log in as Trainee'}
+          {redirecting === 'trainee' ? 'Redirecting...' : 'Log in with Google as Trainee'}
         </button>
 
         <button
           className={styles.btnSecondary}
           type="button"
-          onClick={() => sendMagicLink('volunteer')}
-          disabled={sending !== null}
+          onClick={() => loginWithGoogle('volunteer')}
+          disabled={redirecting !== null}
         >
-          {sending === 'volunteer' ? 'Sending...' : 'Log in as Volunteer'}
+          {redirecting === 'volunteer' ? 'Redirecting...' : 'Log in with Google as Volunteer'}
         </button>
 
         {message && <p className={styles.error}>{message}</p>}

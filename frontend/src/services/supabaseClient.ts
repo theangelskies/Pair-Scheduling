@@ -15,8 +15,8 @@ function createMissingConfigClient() {
           },
         },
       }),
-      signInWithOtp: async () => ({
-        data: { user: null, session: null },
+      signInWithOAuth: async () => ({
+        data: { provider: 'google', url: null },
         error: {
           name: 'SupabaseConfigError',
           message: 'Supabase is not configured for this environment.',

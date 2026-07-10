@@ -52,3 +52,18 @@ export async function loadCurrentUser(email?: string | null) {
 export function goToRoleHome(navigate: NavigateFn, role: string) {
   void navigate({ to: role === 'volunteer' ? '/volunteer' : '/trainee' })
 }
+
+// Google OAuth (unlike magic-link OTP) has no way to attach custom metadata
+// to the sign-in request, so the role chosen on the login page rides along
+// in localStorage across the redirect to Google and back instead.
+const PENDING_ROLE_KEY = 'pendingRole'
+
+export function savePendingRole(role: 'trainee' | 'volunteer') {
+  localStorage.setItem(PENDING_ROLE_KEY, role)
+}
+
+export function consumePendingRole(): 'trainee' | 'volunteer' | null {
+  const role = localStorage.getItem(PENDING_ROLE_KEY)
+  localStorage.removeItem(PENDING_ROLE_KEY)
+  return role === 'trainee' || role === 'volunteer' ? role : null
+}
