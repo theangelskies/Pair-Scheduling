@@ -1,8 +1,14 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import api from '../services/api'
+import {
+  getStoredUser,
+  isOnboardingResponse,
+  loadCurrentUser,
+  type AppUser,
+} from '../services/profile'
 import styles from './trainee.module.css'
-
+import { useAuth } from '../context/AuthContext'
 export const Route = createFileRoute('/trainee')({
   component: Trainee,
 })
@@ -51,18 +57,10 @@ function groupByDay(slots: Slot[]): [string, Slot[]][] {
   return Array.from(map.entries())
 }
 
-function getCurrentUser() {
-  try {
-    const raw = localStorage.getItem('currentUser')
-    return raw ? (JSON.parse(raw) as { id: number; name: string; role: string }) : null
-  } catch {
-    return null
-  }
-}
-
 export function Trainee() {
   const navigate = useNavigate()
-  const currentUser = getCurrentUser()
+  const { session, loading: authLoading } = useAuth()
+  const [currentUser, setCurrentUser] = useState<AppUser | null>(() => getStoredUser())
   const canBook = currentUser?.role === 'trainee'
   const [slots, setSlots] = useState<Slot[]>([])
   const [loading, setLoading] = useState(true)
@@ -74,7 +72,18 @@ export function Trainee() {
   function refreshSlots() {
     api
       .getAvailableSlots()
-      .then((data: Slot[]) => {
+      .then((data: Slot[] | unknown) => {
+        if (isOnboardingResponse(data)) {
+          void navigate({ to: '/onboarding' })
+          return
+        }
+
+        if (!Array.isArray(data)) {
+          setError('Could not load slots.')
+          setLoading(false)
+          return
+        }
+
         setSlots(data)
         setLoading(false)
       })
@@ -95,10 +104,34 @@ export function Trainee() {
   }
 
   useEffect(() => {
-    refreshSlots()
+    if (!authLoading && !session) {
+      void navigate({ to: '/login' })
+      return
+    }
+
+    if (!authLoading && session && !currentUser) {
+      loadCurrentUser(session.user.email)
+        .then((user) => {
+          if (isOnboardingResponse(user)) {
+            void navigate({ to: '/onboarding' })
+            return
+          }
+
+          setCurrentUser(user)
+        })
+        .catch((err: Error) => {
+          setError(err.message)
+          setLoading(false)
+        })
+    }
+  }, [authLoading, currentUser, session, navigate])
+
+  useEffect(() => {
+    if (!session || !currentUser) return
     refreshBookings()
+    refreshSlots()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [session, currentUser])
 
   async function handleCancelBooking(bookingId: number) {
     if (!currentUser || !confirm('Cancel this booking?')) return
@@ -122,7 +155,9 @@ export function Trainee() {
       },
     })
   }
-
+  if (authLoading) {
+    return <div className={styles.emptyState}>Checking sign in...</div>
+  }
   if (loading) return <div className={styles.emptyState}>Loading slots…</div>
   if (error) return <div className={styles.emptyState}>Error: {error}</div>
 

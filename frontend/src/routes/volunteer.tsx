@@ -1,7 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router'
 import axios from 'axios'
 import { useEffect, useState } from 'react'
+import { useAuth } from '../context/AuthContext'
 import api from '../services/api'
+import {
+  getStoredUser,
+  isOnboardingResponse,
+  loadCurrentUser,
+  type AppUser,
+} from '../services/profile'
 import styles from './volunteer.module.css'
 
 export const Route = createFileRoute('/volunteer')({
@@ -44,19 +51,9 @@ function formatDay(dateStr: string) {
   })
 }
 
-function getCurrentUser() {
-  try {
-    const raw = localStorage.getItem('currentUser')
-    return raw
-      ? (JSON.parse(raw) as { id: number; name: string; email: string; role: string })
-      : null
-  } catch {
-    return null
-  }
-}
-
 export function Volunteer() {
-  const currentUser = getCurrentUser()
+  const { session, loading: authLoading } = useAuth()
+  const [currentUser, setCurrentUser] = useState<AppUser | null>(() => getStoredUser())
   const canCreateSlot = currentUser?.role === 'volunteer'
   const [mySlots, setMySlots] = useState<MySlot[]>([])
   const [date, setDate] = useState('')
@@ -81,7 +78,17 @@ export function Volunteer() {
     if (!currentUser) return
     api
       .getMySlots(currentUser.id)
-      .then((data: ApiSlot[]) => {
+      .then((data: ApiSlot[] | unknown) => {
+        if (isOnboardingResponse(data)) {
+          window.location.href = '/onboarding'
+          return
+        }
+
+        if (!Array.isArray(data)) {
+          setMessage({ text: 'Could not load your slots.', error: true })
+          return
+        }
+
         setMySlots(apiSlotsToMySlots(data))
       })
       .catch(() => {
@@ -90,9 +97,32 @@ export function Volunteer() {
   }
 
   useEffect(() => {
+    if (!authLoading && !session) {
+      window.location.href = '/login'
+      return
+    }
+
+    if (!authLoading && session && !currentUser) {
+      loadCurrentUser(session.user.email)
+        .then((user) => {
+          if (isOnboardingResponse(user)) {
+            window.location.href = '/onboarding'
+            return
+          }
+
+          setCurrentUser(user)
+        })
+        .catch(() => {
+          setMessage({ text: 'Could not load your profile. Please try again.', error: true })
+        })
+    }
+  }, [authLoading, currentUser, session])
+
+  useEffect(() => {
+    if (!session || !currentUser) return
     refreshSlots()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [session, currentUser])
 
   async function handleAddSlot() {
     if (!date || !startTime || !endTime) {
@@ -156,6 +186,10 @@ export function Volunteer() {
       })
       refreshSlots()
     }
+  }
+
+  if (authLoading) {
+    return <div className={styles.page}>Checking sign in...</div>
   }
 
   return (
