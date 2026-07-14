@@ -108,6 +108,21 @@ function BookConfirmation() {
     )
   }
 
+  if (state.status === 'tooSoon') {
+    return (
+      <div className={styles.wrap}>
+        <div className={styles.card}>
+          <div className={`${styles.icon} ${styles.iconError}`}>!</div>
+          <h2>Too soon to book</h2>
+          <p>{state.message}</p>
+          <Link to="/trainee" className={styles.btnSecondary}>
+            ← Back to sessions
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className={styles.wrap}>
       <div className={styles.card}>

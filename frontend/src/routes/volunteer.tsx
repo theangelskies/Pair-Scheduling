@@ -22,6 +22,7 @@ type ApiSlot = {
   start_time: string
   end_time: string
   status: string
+  minimum_notice_hours: number
   trainee_name: string | null
   booking_id: number | null
 }
@@ -31,6 +32,7 @@ type MySlot = {
   timeRange: string
   date: string
   status: 'available' | 'booked'
+  minimumNoticeHours: number
   bookedBy?: string
   bookingId?: number
 }
@@ -59,6 +61,7 @@ export function Volunteer() {
   const [date, setDate] = useState('')
   const [startTime, setStartTime] = useState('10:00')
   const [endTime, setEndTime] = useState('11:00')
+  const [minimumNoticeHours, setMinimumNoticeHours] = useState('24')
   const [isRecurring, setIsRecurring] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null)
@@ -69,6 +72,7 @@ export function Volunteer() {
       timeRange: formatTimeRange(s.start_time, s.end_time),
       date: formatDay(s.start_time),
       status: s.status === 'available' ? ('available' as const) : ('booked' as const),
+      minimumNoticeHours: s.minimum_notice_hours,
       bookedBy: s.trainee_name ?? undefined,
       bookingId: s.booking_id ?? undefined,
     }))
