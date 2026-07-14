@@ -19,6 +19,7 @@ type BookingState =
   | { status: 'loading' }
   | { status: 'success'; meetLink: string }
   | { status: 'conflict' }
+  | { status: 'tooSoon'; message: string }
   | { status: 'error'; message: string }
 
 function BookConfirmation() {
@@ -42,6 +43,12 @@ function BookConfirmation() {
         if (cancelled) return
         if (axios.isAxiosError(err) && err.response?.status === 409) {
           setState({ status: 'conflict' })
+        } else if (axios.isAxiosError(err) && err.response?.status === 422) {
+          setState({
+            status: 'tooSoon',
+            message:
+              err.response.data?.error ?? 'This session starts too soon to book.',
+          })
         } else {
           setState({
             status: 'error',
