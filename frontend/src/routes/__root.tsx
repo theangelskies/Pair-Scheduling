@@ -66,7 +66,7 @@ function RootLayout() {
         >
           About
         </Link>
-        {user?.role === 'trainee' && (
+        {(user?.role === 'trainee' || user?.role === 'volunteer') && (
           <Link
             to="/trainee"
             activeProps={{ className: styles.navLinkActive }}

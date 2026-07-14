@@ -22,7 +22,6 @@ type ApiSlot = {
   start_time: string
   end_time: string
   status: string
-  minimum_notice_hours: number
   trainee_name: string | null
   booking_id: number | null
 }
@@ -32,7 +31,6 @@ type MySlot = {
   timeRange: string
   date: string
   status: 'available' | 'booked'
-  minimumNoticeHours: number
   bookedBy?: string
   bookingId?: number
 }
@@ -61,7 +59,6 @@ export function Volunteer() {
   const [date, setDate] = useState('')
   const [startTime, setStartTime] = useState('10:00')
   const [endTime, setEndTime] = useState('11:00')
-  const [minimumNoticeHours, setMinimumNoticeHours] = useState('24')
   const [isRecurring, setIsRecurring] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null)
@@ -72,7 +69,6 @@ export function Volunteer() {
       timeRange: formatTimeRange(s.start_time, s.end_time),
       date: formatDay(s.start_time),
       status: s.status === 'available' ? ('available' as const) : ('booked' as const),
-      minimumNoticeHours: s.minimum_notice_hours,
       bookedBy: s.trainee_name ?? undefined,
       bookingId: s.booking_id ?? undefined,
     }))
@@ -138,12 +134,6 @@ export function Volunteer() {
       return
     }
 
-    const noticeHours = Number(minimumNoticeHours)
-    if (!Number.isFinite(noticeHours) || noticeHours < 0) {
-      setMessage({ text: 'Minimum notice must be a positive number of hours.', error: true })
-      return
-    }
-
     const start = new Date(`${date}T${startTime}`)
     const end = new Date(`${date}T${endTime}`)
 
@@ -156,7 +146,7 @@ export function Volunteer() {
         start_time: start.toISOString(),
         end_time: end.toISOString(),
         is_recurring: isRecurring,
-        minimum_notice_hours: noticeHours,
+        minimum_notice_hours: 24,
       })
 
       setDate('')
@@ -249,19 +239,6 @@ export function Volunteer() {
                 onChange={(e) => setEndTime(e.target.value)}
               />
             </div>
-            <div className={styles.formField}>
-              <label className={styles.fieldLabel} htmlFor="slot-notice">
-                Minimum notice (hours)
-              </label>
-              <input
-                id="slot-notice"
-                className={styles.fieldInput}
-                type="number"
-                min={0}
-                value={minimumNoticeHours}
-                onChange={(e) => setMinimumNoticeHours(e.target.value)}
-              />
-            </div>
           </div>
           <div className={styles.toggleRow}>
             <button
@@ -293,7 +270,6 @@ export function Volunteer() {
               <div className={styles.slotInfo}>
                 <div className={styles.slotTime}>{slot.timeRange}</div>
                 <div className={styles.slotDate}>{slot.date}</div>
-                <div className={styles.slotDate}>Requires {slot.minimumNoticeHours}h notice</div>
                 {slot.bookedBy && <div className={styles.bookedBy}>Booked by {slot.bookedBy}</div>}
               </div>
               <div className={styles.slotRight}>
