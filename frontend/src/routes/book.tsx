@@ -46,8 +46,7 @@ function BookConfirmation() {
         } else if (axios.isAxiosError(err) && err.response?.status === 422) {
           setState({
             status: 'tooSoon',
-            message:
-              err.response.data?.error ?? 'This session starts too soon to book.',
+            message: err.response.data?.error ?? 'This session starts too soon to book.',
           })
         } else {
           setState({
