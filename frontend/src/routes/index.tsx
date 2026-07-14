@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import styles from './home.module.css'
 
 // File name determines the URL path: index.tsx → "/"
@@ -49,6 +49,8 @@ const steps = [
 ]
 
 export function HomePage() {
+  const navigate = useNavigate()
+
   return (
     <div className={styles.page}>
       <section className={styles.hero}>
@@ -66,6 +68,27 @@ export function HomePage() {
       </section>
 
       <section className={styles.rolesSection}>
+        <label className={styles.roleSelectLabel} htmlFor="role-select">
+          Continue as
+        </label>
+        <select
+          id="role-select"
+          className={styles.roleSelect}
+          defaultValue=""
+          onChange={(event) => {
+            const role = event.target.value
+            if (role === 'volunteer' || role === 'trainee') {
+              void navigate({ to: role === 'volunteer' ? '/volunteer' : '/trainee' })
+            }
+          }}
+        >
+          <option value="" disabled>
+            Choose a role
+          </option>
+          <option value="volunteer">Volunteer</option>
+          <option value="trainee">Trainee</option>
+        </select>
+
         <div className={styles.rolesRow}>
           {roles.map((role) => (
             <div key={role.key} className={`${styles.roleCard} ${role.accentClass}`}>

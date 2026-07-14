@@ -25,6 +25,7 @@
   color: var(--ink-soft);
   font-size: 0.9rem;
   margin: 0 0 1.75rem;
+  overflow-wrap: anywhere;
 }
 
 /* ── Role toggle ── */
@@ -177,4 +178,25 @@
 
 .btnSecondary:hover {
   background: var(--ground);
+}
+
+@media (max-width: 520px) {
+  .wrap {
+    padding: 1rem;
+    align-items: flex-start;
+  }
+
+  .card {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .wrap {
+    padding-inline: 0.75rem;
+  }
+
+  .card {
+    padding: 1.25rem;
+  }
 }

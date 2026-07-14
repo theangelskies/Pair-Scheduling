@@ -15,6 +15,7 @@
   flex-direction: column;
   gap: 72px;
   padding: 64px 24px 80px;
+  width: 100%;
   max-width: 880px;
   margin: 0 auto;
   font-family: 'Inter', system-ui, sans-serif;
@@ -31,6 +32,8 @@
   gap: 10px;
   text-align: center;
   padding-top: 8px;
+  width: 100%;
+  min-width: 0;
 }
 
 .heroMark {
@@ -86,6 +89,7 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--muted);
+  max-width: 100%;
 }
 
 .title {
@@ -97,15 +101,17 @@
   font-size: 48px;
   line-height: 1.05;
   letter-spacing: -0.01em;
+  max-width: 100%;
+  overflow-wrap: normal;
 }
 
 .subtitle {
   position: relative;
   z-index: 1;
   margin: 6px 0 0;
-  white-space: nowrap;
   font-size: 16px;
   color: var(--muted);
+  max-width: 100%;
 }
 
 /* ---------- Roles ---------- */
@@ -113,6 +119,27 @@
 .rolesSection {
   display: flex;
   flex-direction: column;
+  gap: 18px;
+}
+
+.roleSelectLabel {
+  display: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.roleSelect {
+  display: none;
+  width: 100%;
+  max-width: 360px;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  align-self: center;
 }
 
 .rolesRow {
@@ -124,6 +151,7 @@
 .roleCard {
   flex: 1;
   min-width: 260px;
+  min-width: min(260px, 100%);
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 16px;
@@ -258,12 +286,29 @@
 /* ---------- Responsive & motion ---------- */
 
 @media (max-width: 560px) {
+  .page {
+    gap: 48px;
+    padding: 44px 16px 56px;
+  }
+
+  .hero {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .heroMark {
+    left: 86px;
+    transform: none;
+  }
+
   .title {
-    font-size: 36px;
+    font-size: 32px;
+    max-width: 220px;
   }
 
   .subtitle {
-    white-space: normal;
+    font-size: 15px;
+    max-width: 280px;
   }
 
   .heroMark {
@@ -274,6 +319,56 @@
 
   .stepsRow::before {
     display: none;
+  }
+
+  .roleSelect {
+    display: block;
+    max-width: 100%;
+    align-self: stretch;
+  }
+
+  .rolesSection {
+    max-width: 288px;
+    width: 100%;
+  }
+
+  .roleSelectLabel {
+    display: block;
+  }
+
+  .rolesRow {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .roleCard {
+    width: 100%;
+    min-width: 0;
+    padding: 22px 18px;
+  }
+
+  .stepCard {
+    min-width: 100%;
+  }
+}
+
+@media (max-width: 360px) {
+  .page {
+    padding-inline: 8px;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    overflow-wrap: anywhere;
+  }
+
+  .roleCard {
+    padding: 20px 16px;
   }
 }
 
