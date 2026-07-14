@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import axios from 'axios'
 import { supabase } from '../services/supabaseClient'
 import api from '../services/api'
 import {
@@ -35,40 +36,60 @@ function AuthCallback() {
     }
 
     async function checkSession() {
-      const { data } = await supabase.auth.getSession()
+      try {
+        const { data } = await supabase.auth.getSession()
 
-      if (data.session) {
-        const user = await loadCurrentUser(data.session.user.email)
+        if (data.session) {
+          const user = await loadCurrentUser(data.session.user.email)
 
-        if (isOnboardingResponse(user)) {
-          // The role picked on the login page ("Log in with Google as Trainee/Volunteer")
-          // rides along in localStorage across the Google redirect — use it to
-          // provision a first-time profile automatically, without a separate
-          // manual onboarding step.
-          const requestedRole = consumePendingRole()
+          if (isOnboardingResponse(user)) {
+            // The role picked on the login page ("Log in with Google as Trainee/Volunteer")
+            // rides along in localStorage across the Google redirect — use it to
+            // provision a first-time profile automatically, without a separate
+            // manual onboarding step.
+            const requestedRole = consumePendingRole()
 
-          if (requestedRole) {
-            try {
-              const created = await api.createProfile({ role: requestedRole })
-              if (created.user) {
-                saveCurrentUser(created.user)
-                goToRoleHome(navigate, created.user.role)
-                return
+            if (requestedRole) {
+              try {
+                const created = await api.createProfile({ role: requestedRole })
+                if (created.user) {
+                  saveCurrentUser(created.user)
+                  goToRoleHome(navigate, created.user.role)
+                  return
+                }
+              } catch {
+                // fall through to manual onboarding if auto-provisioning fails
               }
-            } catch {
-              // fall through to manual onboarding if auto-provisioning fails
             }
+
+            void navigate({ to: '/onboarding' })
+            return
           }
 
-          void navigate({ to: '/onboarding' })
+          goToRoleHome(navigate, user.role)
           return
         }
 
-        goToRoleHome(navigate, user.role)
-        return
-      }
+        void navigate({ to: '/login' })
+      } catch (err) {
+        console.error('Auth callback failed:', err)
 
-      void navigate({ to: '/login' })
+        if (axios.isAxiosError(err)) {
+          if (err.response) {
+            const detail =
+              typeof err.response.data?.error === 'string' ? err.response.data.error : undefined
+            setError(
+              `Sign-in request failed (${err.response.status}: ${err.response.statusText}).` +
+                (detail ? ` ${detail}` : ''),
+            )
+          } else {
+            setError(`Could not reach the server (${err.message}). Is the backend running?`)
+          }
+          return
+        }
+
+        setError(err instanceof Error ? err.message : 'Something went wrong while signing you in.')
+      }
     }
 
     void checkSession()

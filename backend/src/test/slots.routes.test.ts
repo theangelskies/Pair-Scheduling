@@ -146,6 +146,15 @@ describe('GET /api/slots/mine', () => {
     ])
   })
 
+  it('excludes past slots that were never booked', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [] })
+
+    await request(app).get('/api/slots/mine').query({ volunteerId: 4 })
+
+    const [sql] = pool.query.mock.calls[0]
+    expect(sql).toContain("ts.status != 'available' OR ts.start_time > NOW()")
+  })
+
   it('returns 500 when the database query fails', async () => {
     pool.query.mockRejectedValueOnce(new Error('DB error'))
 

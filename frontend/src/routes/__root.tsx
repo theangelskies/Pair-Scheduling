@@ -66,27 +66,33 @@ function RootLayout() {
         >
           About
         </Link>
-        <Link
-          to="/trainee"
-          activeProps={{ className: styles.navLinkActive }}
-          className={styles.navLink}
-        >
-          Trainee
-        </Link>
-        <Link
-          to="/volunteer"
-          activeProps={{ className: styles.navLinkActive }}
-          className={styles.navLink}
-        >
-          Volunteer
-        </Link>
-        <Link
-          to="/login"
-          activeProps={{ className: styles.navLinkActive }}
-          className={styles.navLink}
-        >
-          Login
-        </Link>
+        {(user?.role === 'trainee' || user?.role === 'volunteer') && (
+          <Link
+            to="/trainee"
+            activeProps={{ className: styles.navLinkActive }}
+            className={styles.navLink}
+          >
+            Trainee
+          </Link>
+        )}
+        {user?.role === 'volunteer' && (
+          <Link
+            to="/volunteer"
+            activeProps={{ className: styles.navLinkActive }}
+            className={styles.navLink}
+          >
+            Volunteer
+          </Link>
+        )}
+        {!user && (
+          <Link
+            to="/login"
+            activeProps={{ className: styles.navLinkActive }}
+            className={styles.navLink}
+          >
+            Login
+          </Link>
+        )}
 
         {user && (
           <div className={styles.userBadge}>
