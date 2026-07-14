@@ -138,6 +138,12 @@ export function Volunteer() {
       return
     }
 
+    const noticeHours = Number(minimumNoticeHours)
+    if (!Number.isFinite(noticeHours) || noticeHours < 0) {
+      setMessage({ text: 'Minimum notice must be a positive number of hours.', error: true })
+      return
+    }
+
     const start = new Date(`${date}T${startTime}`)
     const end = new Date(`${date}T${endTime}`)
 
@@ -150,7 +156,7 @@ export function Volunteer() {
         start_time: start.toISOString(),
         end_time: end.toISOString(),
         is_recurring: isRecurring,
-        minimum_notice_hours: 24,
+        minimum_notice_hours: noticeHours,
       })
 
       setDate('')
@@ -243,6 +249,19 @@ export function Volunteer() {
                 onChange={(e) => setEndTime(e.target.value)}
               />
             </div>
+            <div className={styles.formField}>
+              <label className={styles.fieldLabel} htmlFor="slot-notice">
+                Minimum notice (hours)
+              </label>
+              <input
+                id="slot-notice"
+                className={styles.fieldInput}
+                type="number"
+                min={0}
+                value={minimumNoticeHours}
+                onChange={(e) => setMinimumNoticeHours(e.target.value)}
+              />
+            </div>
           </div>
           <div className={styles.toggleRow}>
             <button
@@ -274,6 +293,7 @@ export function Volunteer() {
               <div className={styles.slotInfo}>
                 <div className={styles.slotTime}>{slot.timeRange}</div>
                 <div className={styles.slotDate}>{slot.date}</div>
+                <div className={styles.slotDate}>Requires {slot.minimumNoticeHours}h notice</div>
                 {slot.bookedBy && <div className={styles.bookedBy}>Booked by {slot.bookedBy}</div>}
               </div>
               <div className={styles.slotRight}>

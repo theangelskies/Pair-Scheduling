@@ -199,6 +199,52 @@ describe('POST /api/bookings', () => {
     expect(mockCreateMeetingLink).not.toHaveBeenCalled()
   })
 
+  it('returns 422 when the slot starts sooner than its minimum notice window', async () => {
+    const soonSlot = {
+      ...SLOT,
+      start_time: new Date(Date.now() + 60 * 60 * 1000).toISOString(), // 1 hour out
+      minimum_notice_hours: 24,
+    }
+    pool.query
+      .mockResolvedValueOnce({ rows: [] }) // BEGIN
+      .mockResolvedValueOnce({ rows: [soonSlot] }) // fetch slot
+      .mockResolvedValueOnce({ rows: [] }) // ROLLBACK
+
+    const res = await request(app)
+      .post('/api/bookings')
+      .send({ slotId: soonSlot.id, traineeId: TRAINEE.id })
+
+    expect(res.status).toBe(422)
+    expect(res.body.error).toMatch(/24 hours/)
+    expect(mockCreateMeetingLink).not.toHaveBeenCalled()
+  })
+
+  it('books successfully when the slot meets its minimum notice window', async () => {
+    const okSlot = {
+      ...SLOT,
+      start_time: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
+      minimum_notice_hours: 24,
+    }
+    pool.query
+      .mockResolvedValueOnce({ rows: [] }) // BEGIN
+      .mockResolvedValueOnce({ rows: [okSlot] }) // fetch slot
+      .mockResolvedValueOnce({ rows: [VOLUNTEER] })
+      .mockResolvedValueOnce({ rows: [TRAINEE] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ id: 99 }] })
+      .mockResolvedValueOnce({ rows: [] }) // COMMIT
+
+    mockCreateMeetingLink.mockReturnValueOnce({
+      meetLink: 'https://meet.jit.si/pair-scheduling-abc123',
+    })
+
+    const res = await request(app)
+      .post('/api/bookings')
+      .send({ slotId: okSlot.id, traineeId: TRAINEE.id })
+
+    expect(res.status).toBe(201)
+  })
+
   it('sends a booking confirmation email to the volunteer and trainee', async () => {
     pool.query
       .mockResolvedValueOnce({ rows: [] }) // BEGIN
