@@ -1,5 +1,6 @@
 import { createRootRoute, Link, Outlet, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import { supabase } from '../services/supabaseClient'
 import styles from './__root.module.css'
 
 export const Route = createRootRoute({
@@ -34,6 +35,7 @@ function useCurrentUser() {
 
     window.addEventListener('storage', onStorage)
     window.addEventListener('currentUserChanged', syncUser)
+
     return () => {
       window.removeEventListener('storage', onStorage)
       window.removeEventListener('currentUserChanged', syncUser)
@@ -47,18 +49,29 @@ function RootLayout() {
   const navigate = useNavigate()
   const { user, setUser } = useCurrentUser()
 
-  function handleSignOut() {
+  const isAdmin = user?.role === 'admin'
+
+  async function handleSignOut() {
+    await supabase.auth.signOut()
+
     localStorage.removeItem('currentUser')
+
     setUser(null)
+
     void navigate({ to: '/login' })
   }
 
   return (
     <>
       <nav className={styles.nav}>
-        <Link to="/" activeProps={{ className: styles.navLinkActive }} className={styles.navLink}>
+        <Link
+          to="/"
+          activeProps={{ className: styles.navLinkActive }}
+          className={styles.navLink}
+        >
           Home
         </Link>
+
         <Link
           to="/about"
           activeProps={{ className: styles.navLinkActive }}
@@ -66,33 +79,69 @@ function RootLayout() {
         >
           About
         </Link>
-        <Link
-          to="/trainee"
-          activeProps={{ className: styles.navLinkActive }}
-          className={styles.navLink}
-        >
-          Trainee
-        </Link>
-        <Link
-          to="/volunteer"
-          activeProps={{ className: styles.navLinkActive }}
-          className={styles.navLink}
-        >
-          Volunteer
-        </Link>
-        <Link
-          to="/login"
-          activeProps={{ className: styles.navLinkActive }}
-          className={styles.navLink}
-        >
-          Login
-        </Link>
+
+        {isAdmin ? (
+          <>
+            <Link
+              to="/users"
+              activeProps={{ className: styles.navLinkActive }}
+              className={styles.navLink}
+            >
+              Users
+            </Link>
+
+            <Link
+              to="/slots"
+              activeProps={{ className: styles.navLinkActive }}
+              className={styles.navLink}
+            >
+              Slots
+            </Link>
+          </>
+        ) : (
+          <>
+            <Link
+              to="/trainee"
+              activeProps={{ className: styles.navLinkActive }}
+              className={styles.navLink}
+            >
+              Trainee
+            </Link>
+
+            <Link
+              to="/volunteer"
+              activeProps={{ className: styles.navLinkActive }}
+              className={styles.navLink}
+            >
+              Volunteer
+            </Link>
+          </>
+        )}
+
+        {!user && (
+          <Link
+            to="/login"
+            activeProps={{ className: styles.navLinkActive }}
+            className={styles.navLink}
+          >
+            Login
+          </Link>
+        )}
 
         {user && (
           <div className={styles.userBadge}>
-            <span className={styles.userName}>{user.name}</span>
-            <span className={styles.userRole}>{user.role}</span>
-            <button className={styles.signOutBtn} onClick={handleSignOut}>
+            <span className={styles.userName}>
+              {user.name}
+            </span>
+
+            <span className={styles.userRole}>
+              {user.role}
+            </span>
+
+            <button
+              className={styles.signOutBtn}
+              onClick={handleSignOut}
+            >
               Sign out
             </button>
           </div>

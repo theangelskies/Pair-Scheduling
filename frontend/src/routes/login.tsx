@@ -8,7 +8,7 @@ export const Route = createFileRoute('/login')({
   component: Login,
 })
 
-type Role = 'trainee' | 'volunteer'
+type Role = 'trainee' | 'volunteer' | 'admin'
 
 export function Login() {
   const [message, setMessage] = useState('')
@@ -17,11 +17,14 @@ export function Login() {
   async function loginWithGoogle(role: Role) {
     setMessage('')
     setRedirecting(role)
+
+    // Store the selected role before redirecting to Google OAuth
     savePendingRole(role)
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
+        // Redirect back to the authentication callback after login
         redirectTo: `${window.location.origin}/auth/callback`,
       },
     })
@@ -30,7 +33,8 @@ export function Login() {
       setRedirecting(null)
       setMessage(error.message)
     }
-    // On success the browser navigates away to Google, so there's nothing more to do here.
+
+    // On successful login, the browser will automatically redirect to Google.
   }
 
   return (
@@ -45,7 +49,9 @@ export function Login() {
           onClick={() => loginWithGoogle('trainee')}
           disabled={redirecting !== null}
         >
-          {redirecting === 'trainee' ? 'Redirecting...' : 'Log in with Google as Trainee'}
+          {redirecting === 'trainee'
+            ? 'Redirecting...'
+            : 'Log in with Google as Trainee'}
         </button>
 
         <button
@@ -54,7 +60,20 @@ export function Login() {
           onClick={() => loginWithGoogle('volunteer')}
           disabled={redirecting !== null}
         >
-          {redirecting === 'volunteer' ? 'Redirecting...' : 'Log in with Google as Volunteer'}
+          {redirecting === 'volunteer'
+            ? 'Redirecting...'
+            : 'Log in with Google as Volunteer'}
+        </button>
+
+        <button
+          className={styles.btnSecondary}
+          type="button"
+          onClick={() => loginWithGoogle('admin')}
+          disabled={redirecting !== null}
+        >
+          {redirecting === 'admin'
+            ? 'Redirecting...'
+            : 'Log in with Google as Administrator'}
         </button>
 
         {message && <p className={styles.error}>{message}</p>}

@@ -20,3 +20,32 @@ export async function getUserById(id: number): Promise<User | null> {
   const { rows } = await pool.query('SELECT * FROM users WHERE id = $1', [id])
   return rows[0] ?? null
 }
+
+export async function updateUserRole(
+  id: number,
+  role: string,
+): Promise<User | null> {
+  const { rows } = await pool.query(
+    `
+    UPDATE users
+    SET role = $1
+    WHERE id = $2
+    RETURNING *
+    `,
+    [role, id],
+  )
+
+  return rows[0] ?? null
+}
+
+export async function deleteUser(
+  id: number,
+): Promise<void> {
+  await pool.query(
+    `
+    DELETE FROM users
+    WHERE id = $1
+    `,
+    [id],
+  )
+}

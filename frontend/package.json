@@ -15,7 +15,7 @@
     "test:ui": "vitest --ui"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.110.1",
+    "@supabase/supabase-js": "^2.110.3",
     "@tanstack/react-router": "^1.170.15",
     "axios": "^1.18.1",
     "react": "^19.2.7",

@@ -35,8 +35,8 @@ app.use('/api', (_req, res, next) => {
 // ── Routes ──────────────────────────────────────────────────────────────────
 // Mount route files here. Keep index.ts clean – one line per feature.
 app.use('/api/profile', requireAuth, profileRouter)
-app.use('/api/users', requireAuth, requireProfile, userRoutes)
-app.use('/api/slots', requireAuth, requireProfile, slotsRouter)
+app.use('/api/users', requireAuth, userRoutes)
+app.use('/api/slots', requireAuth, slotsRouter)
 app.use('/api/bookings', requireAuth, requireProfile, bookingsRouter)
 
 app.get('/api/health', (_req, res) => {
