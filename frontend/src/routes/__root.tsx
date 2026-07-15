@@ -1,5 +1,6 @@
 import { createRootRoute, Link, Outlet, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import { supabase } from '../services/supabaseClient'
 import styles from './__root.module.css'
 
 export const Route = createRootRoute({
@@ -34,6 +35,7 @@ function useCurrentUser() {
 
     window.addEventListener('storage', onStorage)
     window.addEventListener('currentUserChanged', syncUser)
+
     return () => {
       window.removeEventListener('storage', onStorage)
       window.removeEventListener('currentUserChanged', syncUser)
@@ -52,8 +54,13 @@ function RootLayout() {
     setMenuOpen(false)
   }
 
-  function handleSignOut() {
+  const isAdmin = user?.role === 'admin'
+
+  async function handleSignOut() {
+    await supabase.auth.signOut()
+
     localStorage.removeItem('currentUser')
+
     setUser(null)
     closeMenu()
     void navigate({ to: '/login' })
@@ -83,6 +90,7 @@ function RootLayout() {
           >
             Home
           </Link>
+
           <Link
             to="/about"
             activeProps={{ className: styles.navLinkActive }}
@@ -91,26 +99,49 @@ function RootLayout() {
           >
             About
           </Link>
-          {(user?.role === 'trainee' || user?.role === 'volunteer') && (
-            <Link
-              to="/trainee"
-              activeProps={{ className: styles.navLinkActive }}
-              className={styles.navLink}
-              onClick={closeMenu}
-            >
-              Trainee
-            </Link>
+
+          {isAdmin ? (
+            <>
+              <Link
+                to="/users"
+                activeProps={{ className: styles.navLinkActive }}
+                className={styles.navLink}
+                onClick={closeMenu}
+              >
+                Users
+              </Link>
+
+              <Link
+                to="/slots"
+                activeProps={{ className: styles.navLinkActive }}
+                className={styles.navLink}
+                onClick={closeMenu}
+              >
+                Slots
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/trainee"
+                activeProps={{ className: styles.navLinkActive }}
+                className={styles.navLink}
+                onClick={closeMenu}
+              >
+                Trainee
+              </Link>
+
+              <Link
+                to="/volunteer"
+                activeProps={{ className: styles.navLinkActive }}
+                className={styles.navLink}
+                onClick={closeMenu}
+              >
+                Volunteer
+              </Link>
+            </>
           )}
-          {user?.role === 'volunteer' && (
-            <Link
-              to="/volunteer"
-              activeProps={{ className: styles.navLinkActive }}
-              className={styles.navLink}
-              onClick={closeMenu}
-            >
-              Volunteer
-            </Link>
-          )}
+
           {!user && (
             <Link
               to="/login"
@@ -126,7 +157,9 @@ function RootLayout() {
         {user && (
           <div className={styles.userBadge}>
             <span className={styles.userName}>{user.name}</span>
+
             <span className={styles.userRole}>{user.role}</span>
+
             <button className={styles.signOutBtn} onClick={handleSignOut}>
               Sign out
             </button>

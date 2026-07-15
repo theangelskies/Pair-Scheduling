@@ -1,69 +1,122 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
-import { UserCard } from '../components/UserCard'
-import { api } from '../services/api'
-import { isOnboardingResponse } from '../services/profile'
-import { useAuth } from '../context/AuthContext'
+import api from '../services/api'
+import styles from './users.module.css'
 
-type User = { id: number; name: string; role: string }
-
-// users.tsx → "/users"
-// This page fetches data from the backend – a common real-world pattern.
 export const Route = createFileRoute('/users')({
   component: UsersPage,
 })
 
+type User = {
+  id: number
+  name: string
+  role: 'volunteer' | 'trainee'
+}
+
 function UsersPage() {
-  const navigate = useNavigate()
-  const { session, loading: authLoading } = useAuth()
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+
+  async function loadUsers() {
+    try {
+      const data = await api.getUsers()
+      setUsers(data)
+    } catch (err) {
+      console.error(err)
+      alert('Failed to load users.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    if (authLoading) return
+    void loadUsers()
+  }, [])
 
-    if (!session) {
-      void navigate({ to: '/login' })
-      return
+  async function handleRoleChange(id: number, role: 'volunteer' | 'trainee') {
+    try {
+      await api.updateUserRole(id, role)
+
+      setUsers((prev) => prev.map((user) => (user.id === id ? { ...user, role } : user)))
+    } catch (err) {
+      console.error(err)
+      alert('Failed to update role.')
     }
+  }
 
-    api
-      .getUsers()
-      .then((data: User[] | unknown) => {
-        if (isOnboardingResponse(data)) {
-          void navigate({ to: '/onboarding' })
-          return
-        }
+  async function handleDelete(id: number) {
+    const confirmed = window.confirm('Are you sure you want to delete this user?')
 
-        if (!Array.isArray(data)) {
-          setError('Could not load users.')
-          setLoading(false)
-          return
-        }
+    if (!confirmed) return
 
-        setUsers(data)
-        setLoading(false)
-      })
-      .catch((err) => {
-        setError(err.message)
-        setLoading(false)
-      })
-  }, [authLoading, session, navigate])
+    try {
+      await api.deleteUser(id)
 
-  if (authLoading) return <p>Checking sign in...</p>
-  if (loading) return <p>Loading users…</p>
-  if (error) return <p style={{ color: 'red' }}>Error: {error}</p>
+      setUsers((prev) => prev.filter((user) => user.id !== id))
+    } catch (err) {
+      console.error(err)
+      alert('Failed to delete user.')
+    }
+  }
+
+  if (loading) {
+    return <div className={styles.loading}>Loading users...</div>
+  }
 
   return (
-    <div>
-      <h1>👥 Users</h1>
-      <p>
-        Fetched from <code>GET /api/users</code>
-      </p>
-      {users.map((user) => (
-        <UserCard key={user.id} name={user.name} role={user.role} />
-      ))}
+    <div className={styles.wrap}>
+      <h1 className={styles.title}>User Management</h1>
+
+      <div className={styles.tableCard}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Role</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {users.length === 0 ? (
+              <tr>
+                <td colSpan={3} className={styles.empty}>
+                  No users found.
+                </td>
+              </tr>
+            ) : (
+              users.map((user) => (
+                <tr key={user.id}>
+                  <td>{user.name}</td>
+
+                  <td>
+                    <select
+                      aria-label={`Role for ${user.name}`}
+                      className={styles.select}
+                      value={user.role}
+                      onChange={(e) =>
+                        void handleRoleChange(user.id, e.target.value as 'volunteer' | 'trainee')
+                      }
+                    >
+                      <option value="volunteer">Volunteer</option>
+
+                      <option value="trainee">Trainee</option>
+                    </select>
+                  </td>
+
+                  <td>
+                    <button className={styles.deleteBtn} onClick={() => void handleDelete(user.id)}>
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }
+
+export default UsersPage

@@ -32,11 +32,33 @@ export const api = {
     return response.data
   },
 
+  updateUserRole: async (id: number, role: 'trainee' | 'volunteer') => {
+    const response = await apiClient.patch(`/users/${id}`, {
+      role,
+    })
+    return response.data
+  },
+
+  deleteUser: async (id: number) => {
+    const response = await apiClient.delete(`/users/${id}`)
+    return response.data
+  },
+
+  blockUser: async (id: number) => {
+    const response = await apiClient.patch(`/users/${id}/block`)
+    return response.data
+  },
+
   // Slots Management
   getAvailableSlots: async () => {
     const response = await apiClient.get('/slots/available')
     return response.data
   },
+  getAdminSlots: async () => {
+    const response = await apiClient.get('/slots/admin')
+    return response.data
+  },
+
   getMySlots: async (volunteerId: number) => {
     const response = await apiClient.get('/slots/mine', { params: { volunteerId } })
     return response.data
@@ -47,6 +69,10 @@ export const api = {
   },
   cancelSlot: async (slotId: number) => {
     const response = await apiClient.delete(`/slots/${slotId}`)
+    return response.data
+  },
+  deleteAdminSlot: async (slotId: number) => {
+    const response = await apiClient.delete(`/slots/${slotId}/admin`)
     return response.data
   },
 

@@ -21,6 +21,29 @@ router.get('/available', async (_req, res) => {
   }
 })
 
+// GET /api/slots/admin -> Admin: fetch all slots
+router.get('/admin', async (_req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT
+          ts.id,
+          ts.start_time,
+          ts.end_time,
+          ts.status,
+          u.name AS volunteer_name
+       FROM time_slots ts
+       JOIN users u
+         ON ts.volunteer_id = u.id
+       ORDER BY ts.start_time ASC`,
+    )
+
+    res.json(result.rows)
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Database fetch failed' })
+  }
+})
+
 // GET /api/slots/mine?volunteerId=X -> A volunteer's own slots, booked or not
 router.get('/mine', async (req, res) => {
   const { volunteerId } = req.query
@@ -136,6 +159,38 @@ router.delete('/:id', async (req, res) => {
   } catch (err) {
     console.error(err)
     return res.status(500).json({ error: 'Failed to cancel slot' })
+  }
+})
+
+// DELETE /api/slots/:id/admin -> Admin: delete a slot regardless of status.
+// If a confirmed booking exists on it, that booking is removed too, in the
+// same transaction, so we never leave an orphaned booking row behind.
+router.delete('/:id/admin', async (req, res) => {
+  const client = await pool.connect()
+  try {
+    await client.query('BEGIN')
+
+    await client.query(`DELETE FROM bookings WHERE slot_id = $1 AND status = 'confirmed'`, [
+      req.params.id,
+    ])
+
+    const result = await client.query(`DELETE FROM time_slots WHERE id = $1 RETURNING id`, [
+      req.params.id,
+    ])
+
+    if (result.rows.length === 0) {
+      await client.query('ROLLBACK')
+      return res.status(404).json({ error: 'Slot not found' })
+    }
+
+    await client.query('COMMIT')
+    return res.status(200).json({ success: true })
+  } catch (err) {
+    await client.query('ROLLBACK')
+    console.error(err)
+    return res.status(500).json({ error: 'Failed to delete slot' })
+  } finally {
+    client.release()
   }
 })
 

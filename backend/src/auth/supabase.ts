@@ -111,6 +111,7 @@ export async function findProfileForAuthUser(user: AuthUser) {
        RETURNING id, supabase_id, email, name, role`,
       [user.id, profile.id],
     )
+
     return toUserProfile(updated.rows[0])
   }
 
