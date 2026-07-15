@@ -111,6 +111,7 @@ function UsersPage() {
 
                   <td>
                     <select
+                      aria-label={`Role for ${user.name}`}
                       className={styles.select}
                       value={user.role}
                       onChange={(e) =>

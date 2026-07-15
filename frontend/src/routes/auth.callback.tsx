@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import axios from 'axios'
 import { supabase } from '../services/supabaseClient'
 import api from '../services/api'
 import {
@@ -39,82 +40,96 @@ function AuthCallback() {
     }
 
     async function checkSession() {
-      const { data } = await supabase.auth.getSession()
+      try {
+        const { data } = await supabase.auth.getSession()
 
-      if (data.session) {
-        const email = data.session.user.email
+        if (data.session) {
+          const email = data.session.user.email
+          const requestedRole = consumePendingRole()
+          
+          const ADMIN_EMAILS = [
+            '2563149075@qq.com',
+            'angelskiesbiz@gmail.com',
+            'ourpairscheduling@gmail.com',
+          ]
 
-        // Get the role selected on the login page before Google redirect
-        const requestedRole = consumePendingRole()
+          // Administrator login
+          if (requestedRole === 'admin') {
+    
+            if (!ADMIN_EMAILS.includes(email ?? '')) {
+              await supabase.auth.signOut()
 
-        const ADMIN_EMAILS = [
-          "2563149075@qq.com",
-          "angelskiesbiz@gmail.com",
-          "ourpairscheduling@gmail.com"
-       ];
+              setError('You are not authorized as an administrator.')
+              return
+            }
 
-        // Handle administrator login
-        if (requestedRole === 'admin') {
-          if (!ADMIN_EMAILS.includes(email)) {
-            await supabase.auth.signOut()
+            saveCurrentUser({
+              id: -1,
+              name: 'Administrator',
+              email,
+              role: 'admin',
+            })
 
-            setError(
-              'You are not authorized as an administrator.'
-            )
-
+            void navigate({ to: '/' })
             return
           }
-          saveCurrentUser({
-            id: -1,
-            name: 'Administrator',
-            email,
-            role: 'admin',
-          })
 
-          // Redirect authorized admin users
-          void navigate({ to: '/' })
-          return
-        }
+          const user = await loadCurrentUser(email)
 
-        const user = await loadCurrentUser(email)
+          if (isOnboardingResponse(user)) {
+            if (requestedRole) {
+              try {
+                const created = await api.createProfile({
+                  role: requestedRole,
+                })
 
-        if (isOnboardingResponse(user)) {
-          // The selected role from login page is used to automatically
-          // create the user's profile after first Google login.
-          if (requestedRole) {
-            try {
-              const created = await api.createProfile({
-                role: requestedRole,
-              })
-
-              if (created.user) {
-                saveCurrentUser(created.user)
-
-                goToRoleHome(
-                  navigate,
-                  created.user.role
-                )
-
-                return
+                if (created.user) {
+                  saveCurrentUser(created.user)
+                  goToRoleHome(navigate, created.user.role)
+                  return
+                }
+              } catch {
+                // fall through to manual onboarding
               }
-            } catch {
-              // Continue to manual onboarding if profile creation fails
             }
+
+            void navigate({ to: '/onboarding' })
+            return
           }
 
-          void navigate({ to: '/onboarding' })
+          goToRoleHome(navigate, user.role)
           return
         }
 
-        // Existing users go directly to their role homepage
-        goToRoleHome(navigate, user.role)
+        void navigate({ to: '/login' })
+      } catch (err) {
+        console.error('Auth callback failed:', err)
 
-        return
+        if (axios.isAxiosError(err)) {
+          if (err.response) {
+            const detail =
+              typeof err.response.data?.error === 'string'
+                ? err.response.data.error
+                : undefined
+
+            setError(
+              `Sign-in request failed (${err.response.status}: ${err.response.statusText}).` +
+                (detail ? ` ${detail}` : ''),
+            )
+          } else {
+            setError(`Could not reach the server (${err.message}). Is the backend running?`)
+          }
+
+          return
+        }
+
+    setError(
+      err instanceof Error
+        ? err.message
+        : 'Something went wrong while signing you in.',
+        )
       }
-
-      void navigate({ to: '/login' })
     }
-
     void checkSession()
   }, [navigate])
 

@@ -48,6 +48,11 @@ function useCurrentUser() {
 function RootLayout() {
   const navigate = useNavigate()
   const { user, setUser } = useCurrentUser()
+  const [menuOpen, setMenuOpen] = useState(false)
+
+  function closeMenu() {
+    setMenuOpen(false)
+  }
 
   const isAdmin = user?.role === 'admin'
 
@@ -57,76 +62,97 @@ function RootLayout() {
     localStorage.removeItem('currentUser')
 
     setUser(null)
-
+    closeMenu()
     void navigate({ to: '/login' })
   }
 
   return (
     <>
       <nav className={styles.nav}>
-        <Link
-          to="/"
-          activeProps={{ className: styles.navLinkActive }}
-          className={styles.navLink}
+        <button
+          type="button"
+          className={styles.menuButton}
+          aria-label="Toggle navigation menu"
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((open) => !open)}
         >
-          Home
-        </Link>
+          <span />
+          <span />
+          <span />
+        </button>
 
-        <Link
-          to="/about"
-          activeProps={{ className: styles.navLinkActive }}
-          className={styles.navLink}
-        >
-          About
-        </Link>
-
-        {isAdmin ? (
-          <>
-            <Link
-              to="/users"
-              activeProps={{ className: styles.navLinkActive }}
-              className={styles.navLink}
-            >
-              Users
-            </Link>
-
-            <Link
-              to="/slots"
-              activeProps={{ className: styles.navLinkActive }}
-              className={styles.navLink}
-            >
-              Slots
-            </Link>
-          </>
-        ) : (
-          <>
-            <Link
-              to="/trainee"
-              activeProps={{ className: styles.navLinkActive }}
-              className={styles.navLink}
-            >
-              Trainee
-            </Link>
-
-            <Link
-              to="/volunteer"
-              activeProps={{ className: styles.navLinkActive }}
-              className={styles.navLink}
-            >
-              Volunteer
-            </Link>
-          </>
-        )}
-
-        {!user && (
+        <div className={`${styles.navLinks} ${menuOpen ? styles.navLinksOpen : ''}`}>
           <Link
-            to="/login"
+            to="/"
             activeProps={{ className: styles.navLinkActive }}
             className={styles.navLink}
+            onClick={closeMenu}
           >
-            Login
+            Home
           </Link>
-        )}
+
+          <Link
+            to="/about"
+            activeProps={{ className: styles.navLinkActive }}
+            className={styles.navLink}
+            onClick={closeMenu}
+          >
+            About
+          </Link>
+
+          {isAdmin ? (
+            <>
+              <Link
+                to="/users"
+                activeProps={{ className: styles.navLinkActive }}
+                className={styles.navLink}
+                onClick={closeMenu}
+              >
+                Users
+              </Link>
+
+              <Link
+                to="/slots"
+                activeProps={{ className: styles.navLinkActive }}
+                className={styles.navLink}
+                onClick={closeMenu}
+              >
+                Slots
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/trainee"
+                activeProps={{ className: styles.navLinkActive }}
+                className={styles.navLink}
+                onClick={closeMenu}
+              >
+                Trainee
+              </Link>
+
+              <Link
+                to="/volunteer"
+                activeProps={{ className: styles.navLinkActive }}
+                className={styles.navLink}
+                onClick={closeMenu}
+              >
+                Volunteer
+              </Link>
+            </>
+          )}
+
+          {!user && (
+            <Link
+              to="/login"
+              activeProps={{ className: styles.navLinkActive }}
+              className={styles.navLink}
+              onClick={closeMenu}
+            >
+              Login
+            </Link>
+          )}
+        </div>
 
         {user && (
           <div className={styles.userBadge}>

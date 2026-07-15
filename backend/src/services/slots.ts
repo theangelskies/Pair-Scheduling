@@ -16,7 +16,8 @@ export async function getAvailableSlots(): Promise<Slot[]> {
     `SELECT ts.*, u.name as volunteer_name
      FROM time_slots ts
      JOIN users u ON ts.volunteer_id = u.id
-     WHERE ts.status = 'available' AND ts.start_time > NOW()
+     WHERE ts.status = 'available'
+       AND ts.start_time > NOW() + (ts.minimum_notice_hours * INTERVAL '1 hour')
      ORDER BY ts.start_time ASC`,
   )
   return rows

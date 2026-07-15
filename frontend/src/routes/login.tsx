@@ -15,12 +15,13 @@ export function Login() {
   const [redirecting, setRedirecting] = useState<Role | null>(null)
 
   async function loginWithGoogle(role: Role) {
+   
     setMessage('')
     setRedirecting(role)
 
     // Store the selected role before redirecting to Google OAuth
     savePendingRole(role)
-
+   
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {

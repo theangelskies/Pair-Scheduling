@@ -2,6 +2,7 @@
   max-width: 860px;
   margin: 0 auto;
   padding: 2rem 1.5rem;
+  width: 100%;
 }
 
 .header {
@@ -50,6 +51,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  min-width: 0;
   cursor: pointer;
   transition:
     border-color 0.15s,
@@ -67,16 +69,22 @@
   cursor: default;
 }
 
+.slotCard > div:first-child {
+  min-width: 0;
+}
+
 .slotTime {
   font-weight: 600;
   font-size: 0.95rem;
   font-family: 'Menlo', 'Consolas', monospace;
+  overflow-wrap: anywhere;
 }
 
 .slotVol {
   font-size: 0.85rem;
   color: var(--ink-soft);
   margin-top: 0.1rem;
+  overflow-wrap: anywhere;
 }
 
 .slotRight {
@@ -186,6 +194,7 @@
   padding: 0.85rem 1rem;
   margin-bottom: 1.25rem;
   font-size: 0.9rem;
+  overflow-wrap: anywhere;
 }
 
 .modalSlotInfo strong {
@@ -235,6 +244,7 @@
   display: flex;
   gap: 0.6rem;
   margin-top: 1.25rem;
+  flex-wrap: wrap;
 }
 
 .btnConfirm {
@@ -342,6 +352,63 @@
   color: var(--ink-soft);
   margin-bottom: 1.5rem;
   text-align: left;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 1rem 0;
+  }
+
+  .slotCard {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 520px) {
+  .slotCard {
+    flex-direction: column;
+  }
+
+  .slotRight {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .btnBook,
+  .btnCancel {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .modal {
+    padding: 1.25rem;
+  }
+
+  .modalActions {
+    flex-direction: column;
+  }
+
+  .btnCancelModal,
+  .btnConfirm {
+    width: 100%;
+  }
+
+  .confirmWrap {
+    padding: 2rem 0;
+  }
+
+  .confirmCard {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .slotRight {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
 .btnSecondary {
