@@ -170,15 +170,13 @@ router.delete('/:id/admin', async (req, res) => {
   try {
     await client.query('BEGIN')
 
-    await client.query(
-      `DELETE FROM bookings WHERE slot_id = $1 AND status = 'confirmed'`,
-      [req.params.id],
-    )
+    await client.query(`DELETE FROM bookings WHERE slot_id = $1 AND status = 'confirmed'`, [
+      req.params.id,
+    ])
 
-    const result = await client.query(
-      `DELETE FROM time_slots WHERE id = $1 RETURNING id`,
-      [req.params.id],
-    )
+    const result = await client.query(`DELETE FROM time_slots WHERE id = $1 RETURNING id`, [
+      req.params.id,
+    ])
 
     if (result.rows.length === 0) {
       await client.query('ROLLBACK')

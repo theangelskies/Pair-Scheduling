@@ -156,18 +156,11 @@ function RootLayout() {
 
         {user && (
           <div className={styles.userBadge}>
-            <span className={styles.userName}>
-              {user.name}
-            </span>
+            <span className={styles.userName}>{user.name}</span>
 
-            <span className={styles.userRole}>
-              {user.role}
-            </span>
+            <span className={styles.userRole}>{user.role}</span>
 
-            <button
-              className={styles.signOutBtn}
-              onClick={handleSignOut}
-            >
+            <button className={styles.signOutBtn} onClick={handleSignOut}>
               Sign out
             </button>
           </div>

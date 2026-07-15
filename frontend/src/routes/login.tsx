@@ -15,13 +15,12 @@ export function Login() {
   const [redirecting, setRedirecting] = useState<Role | null>(null)
 
   async function loginWithGoogle(role: Role) {
-   
     setMessage('')
     setRedirecting(role)
 
     // Store the selected role before redirecting to Google OAuth
     savePendingRole(role)
-   
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -50,9 +49,7 @@ export function Login() {
           onClick={() => loginWithGoogle('trainee')}
           disabled={redirecting !== null}
         >
-          {redirecting === 'trainee'
-            ? 'Redirecting...'
-            : 'Log in with Google as Trainee'}
+          {redirecting === 'trainee' ? 'Redirecting...' : 'Log in with Google as Trainee'}
         </button>
 
         <button
@@ -61,9 +58,7 @@ export function Login() {
           onClick={() => loginWithGoogle('volunteer')}
           disabled={redirecting !== null}
         >
-          {redirecting === 'volunteer'
-            ? 'Redirecting...'
-            : 'Log in with Google as Volunteer'}
+          {redirecting === 'volunteer' ? 'Redirecting...' : 'Log in with Google as Volunteer'}
         </button>
 
         <button
@@ -72,9 +67,7 @@ export function Login() {
           onClick={() => loginWithGoogle('admin')}
           disabled={redirecting !== null}
         >
-          {redirecting === 'admin'
-            ? 'Redirecting...'
-            : 'Log in with Google as Administrator'}
+          {redirecting === 'admin' ? 'Redirecting...' : 'Log in with Google as Administrator'}
         </button>
 
         {message && <p className={styles.error}>{message}</p>}

@@ -118,7 +118,6 @@ export async function findProfileForAuthUser(user: AuthUser) {
   return toUserProfile(profile)
 }
 
-
 export async function requireProfile(req: Request, res: Response, next: NextFunction) {
   if (!req.user) {
     return res.status(401).json({ error: 'Authentication required' })

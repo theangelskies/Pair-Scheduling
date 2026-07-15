@@ -46,7 +46,7 @@ function AuthCallback() {
         if (data.session) {
           const email = data.session.user.email
           const requestedRole = consumePendingRole()
-          
+
           const ADMIN_EMAILS = [
             '2563149075@qq.com',
             'angelskiesbiz@gmail.com',
@@ -55,7 +55,6 @@ function AuthCallback() {
 
           // Administrator login
           if (requestedRole === 'admin') {
-    
             if (!ADMIN_EMAILS.includes(email ?? '')) {
               await supabase.auth.signOut()
 
@@ -108,9 +107,7 @@ function AuthCallback() {
         if (axios.isAxiosError(err)) {
           if (err.response) {
             const detail =
-              typeof err.response.data?.error === 'string'
-                ? err.response.data.error
-                : undefined
+              typeof err.response.data?.error === 'string' ? err.response.data.error : undefined
 
             setError(
               `Sign-in request failed (${err.response.status}: ${err.response.statusText}).` +
@@ -123,11 +120,7 @@ function AuthCallback() {
           return
         }
 
-    setError(
-      err instanceof Error
-        ? err.message
-        : 'Something went wrong while signing you in.',
-        )
+        setError(err instanceof Error ? err.message : 'Something went wrong while signing you in.')
       }
     }
     void checkSession()

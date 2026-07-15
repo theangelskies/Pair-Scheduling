@@ -36,18 +36,14 @@ function SlotsPage() {
   }, [])
 
   async function handleDelete(id: number) {
-    const confirmed = window.confirm(
-      'Are you sure you want to delete this slot?'
-    )
+    const confirmed = window.confirm('Are you sure you want to delete this slot?')
 
     if (!confirmed) return
 
     try {
       await api.deleteAdminSlot(id)
 
-      setSlots((prev) =>
-        prev.filter((slot) => slot.id !== id)
-      )
+      setSlots((prev) => prev.filter((slot) => slot.id !== id))
     } catch (err) {
       console.error(err)
       alert('Failed to delete slot.')
@@ -55,11 +51,7 @@ function SlotsPage() {
   }
 
   if (loading) {
-    return (
-      <div className={styles.loading}>
-        Loading slots...
-      </div>
-    )
+    return <div className={styles.loading}>Loading slots...</div>
   }
 
   return (
@@ -81,10 +73,7 @@ function SlotsPage() {
           <tbody>
             {slots.length === 0 ? (
               <tr>
-                <td
-                  colSpan={5}
-                  className={styles.empty}
-                >
+                <td colSpan={5} className={styles.empty}>
                   No slots found.
                 </td>
               </tr>
@@ -93,31 +82,16 @@ function SlotsPage() {
                 <tr key={slot.id}>
                   <td>{slot.volunteer_name}</td>
 
+                  <td>{new Date(slot.start_time).toLocaleString()}</td>
+
+                  <td>{new Date(slot.end_time).toLocaleString()}</td>
+
                   <td>
-                    {new Date(
-                      slot.start_time
-                    ).toLocaleString()}
+                    <span className={styles.status}>{slot.status}</span>
                   </td>
 
                   <td>
-                    {new Date(
-                      slot.end_time
-                    ).toLocaleString()}
-                  </td>
-
-                  <td>
-                    <span className={styles.status}>
-                      {slot.status}
-                    </span>
-                  </td>
-
-                  <td>
-                    <button
-                      className={styles.deleteBtn}
-                      onClick={() =>
-                        void handleDelete(slot.id)
-                      }
-                    >
+                    <button className={styles.deleteBtn} onClick={() => void handleDelete(slot.id)}>
                       Delete
                     </button>
                   </td>

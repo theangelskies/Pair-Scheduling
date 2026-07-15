@@ -33,18 +33,11 @@ function UsersPage() {
     void loadUsers()
   }, [])
 
-  async function handleRoleChange(
-    id: number,
-    role: 'volunteer' | 'trainee',
-  ) {
+  async function handleRoleChange(id: number, role: 'volunteer' | 'trainee') {
     try {
       await api.updateUserRole(id, role)
 
-      setUsers((prev) =>
-        prev.map((user) =>
-          user.id === id ? { ...user, role } : user,
-        ),
-      )
+      setUsers((prev) => prev.map((user) => (user.id === id ? { ...user, role } : user)))
     } catch (err) {
       console.error(err)
       alert('Failed to update role.')
@@ -52,18 +45,14 @@ function UsersPage() {
   }
 
   async function handleDelete(id: number) {
-    const confirmed = window.confirm(
-      'Are you sure you want to delete this user?',
-    )
+    const confirmed = window.confirm('Are you sure you want to delete this user?')
 
     if (!confirmed) return
 
     try {
       await api.deleteUser(id)
 
-      setUsers((prev) =>
-        prev.filter((user) => user.id !== id),
-      )
+      setUsers((prev) => prev.filter((user) => user.id !== id))
     } catch (err) {
       console.error(err)
       alert('Failed to delete user.')
@@ -71,18 +60,12 @@ function UsersPage() {
   }
 
   if (loading) {
-    return (
-      <div className={styles.loading}>
-        Loading users...
-      </div>
-    )
+    return <div className={styles.loading}>Loading users...</div>
   }
 
   return (
     <div className={styles.wrap}>
-      <h1 className={styles.title}>
-        User Management
-      </h1>
+      <h1 className={styles.title}>User Management</h1>
 
       <div className={styles.tableCard}>
         <table className={styles.table}>
@@ -97,10 +80,7 @@ function UsersPage() {
           <tbody>
             {users.length === 0 ? (
               <tr>
-                <td
-                  colSpan={3}
-                  className={styles.empty}
-                >
+                <td colSpan={3} className={styles.empty}>
                   No users found.
                 </td>
               </tr>
@@ -115,31 +95,17 @@ function UsersPage() {
                       className={styles.select}
                       value={user.role}
                       onChange={(e) =>
-                        void handleRoleChange(
-                          user.id,
-                          e.target.value as
-                            | 'volunteer'
-                            | 'trainee',
-                        )
+                        void handleRoleChange(user.id, e.target.value as 'volunteer' | 'trainee')
                       }
                     >
-                      <option value="volunteer">
-                        Volunteer
-                      </option>
+                      <option value="volunteer">Volunteer</option>
 
-                      <option value="trainee">
-                        Trainee
-                      </option>
+                      <option value="trainee">Trainee</option>
                     </select>
                   </td>
 
                   <td>
-                    <button
-                      className={styles.deleteBtn}
-                      onClick={() =>
-                        void handleDelete(user.id)
-                      }
-                    >
+                    <button className={styles.deleteBtn} onClick={() => void handleDelete(user.id)}>
                       Delete
                     </button>
                   </td>

@@ -32,10 +32,7 @@ export const api = {
     return response.data
   },
 
-  updateUserRole: async (
-    id: number,
-    role: 'trainee' | 'volunteer'
-  ) => {
+  updateUserRole: async (id: number, role: 'trainee' | 'volunteer') => {
     const response = await apiClient.patch(`/users/${id}`, {
       role,
     })
@@ -60,7 +57,7 @@ export const api = {
   getAdminSlots: async () => {
     const response = await apiClient.get('/slots/admin')
     return response.data
-},
+  },
 
   getMySlots: async (volunteerId: number) => {
     const response = await apiClient.get('/slots/mine', { params: { volunteerId } })
@@ -77,7 +74,7 @@ export const api = {
   deleteAdminSlot: async (slotId: number) => {
     const response = await apiClient.delete(`/slots/${slotId}/admin`)
     return response.data
-},
+  },
 
   // Booking Management
   bookSlot: async (slotId: number, bookingData: Record<string, unknown>) => {

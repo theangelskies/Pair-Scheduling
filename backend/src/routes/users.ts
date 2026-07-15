@@ -1,10 +1,5 @@
 import { Router } from 'express'
-import {
-  getAllUsers,
-  getUserById,
-  updateUserRole,
-  deleteUser,
-} from '../services/users.js'
+import { getAllUsers, getUserById, updateUserRole, deleteUser } from '../services/users.js'
 
 // Router files only handle HTTP concerns (parsing, status codes, responses).
 // All business logic lives in services/.

@@ -21,10 +21,7 @@ export async function getUserById(id: number): Promise<User | null> {
   return rows[0] ?? null
 }
 
-export async function updateUserRole(
-  id: number,
-  role: string,
-): Promise<User | null> {
+export async function updateUserRole(id: number, role: string): Promise<User | null> {
   const { rows } = await pool.query(
     `
     UPDATE users
@@ -38,9 +35,7 @@ export async function updateUserRole(
   return rows[0] ?? null
 }
 
-export async function deleteUser(
-  id: number,
-): Promise<void> {
+export async function deleteUser(id: number): Promise<void> {
   await pool.query(
     `
     DELETE FROM users

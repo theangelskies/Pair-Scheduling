@@ -15,9 +15,7 @@ export type OnboardingResponse = {
   email?: string
 }
 
-export function isOnboardingResponse(
-  value: unknown
-): value is OnboardingResponse {
+export function isOnboardingResponse(value: unknown): value is OnboardingResponse {
   return (
     typeof value === 'object' &&
     value !== null &&
@@ -54,10 +52,7 @@ export async function loadCurrentUser(email?: string | null) {
     }
   }
 
-  const user =
-    data.find(
-      (candidate: AppUser) => candidate.email === email
-    ) ?? null
+  const user = data.find((candidate: AppUser) => candidate.email === email) ?? null
 
   if (!user) {
     return {
@@ -75,10 +70,7 @@ export async function loadCurrentUser(email?: string | null) {
  * Administrators are handled separately in auth/callback.tsx,
  * so this function only deals with trainee and volunteer.
  */
-export function goToRoleHome(
-  navigate: NavigateFn,
-  role: string
-) {
+export function goToRoleHome(navigate: NavigateFn, role: string) {
   if (role === 'volunteer') {
     void navigate({ to: '/volunteer' })
     return
@@ -102,11 +94,7 @@ export function consumePendingRole(): Role | null {
 
   localStorage.removeItem(PENDING_ROLE_KEY)
 
-  if (
-    role === 'trainee' ||
-    role === 'volunteer' ||
-    role === 'admin'
-  ) {
+  if (role === 'trainee' || role === 'volunteer' || role === 'admin') {
     return role
   }
 
