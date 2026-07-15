@@ -1,10 +1,39 @@
 .nav {
+  position: relative;
   padding: 0.75rem 1.5rem;
   border-bottom: 1px solid #e2e8f0;
   display: flex;
   gap: 1rem;
   align-items: center;
   flex-wrap: wrap;
+}
+
+.menuButton {
+  display: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0.45rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  cursor: pointer;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.menuButton span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--ink);
+}
+
+.navLinks {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
 }
 
 .userBadge {
@@ -67,9 +96,32 @@
     gap: 0.75rem;
   }
 
+  .menuButton {
+    display: flex;
+  }
+
+  .navLinks {
+    display: none;
+    width: 100%;
+    order: 3;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25rem;
+    padding-top: 0.5rem;
+  }
+
+  .navLinksOpen {
+    display: flex;
+  }
+
+  .navLink {
+    padding: 0.65rem 0;
+  }
+
   .userBadge {
     width: 100%;
     margin-left: 0;
+    order: 2;
   }
 
   .main {
