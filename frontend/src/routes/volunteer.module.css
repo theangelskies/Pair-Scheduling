@@ -2,6 +2,7 @@
   max-width: 860px;
   margin: 0 auto;
   padding: 2rem 1.5rem;
+  width: 100%;
 }
 
 .header {
@@ -44,6 +45,7 @@
 .formField {
   flex: 1;
   min-width: 140px;
+  min-width: min(140px, 100%);
 }
 
 .fieldLabel {
@@ -154,6 +156,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  min-width: 0;
 }
 
 .slotInfo {
@@ -165,12 +168,14 @@
   font-weight: 600;
   font-size: 0.95rem;
   font-family: 'Menlo', 'Consolas', monospace;
+  overflow-wrap: anywhere;
 }
 
 .slotDate {
   font-size: 0.83rem;
   color: var(--ink-soft);
   margin-top: 0.1rem;
+  overflow-wrap: anywhere;
 }
 
 .bookedBy {
@@ -178,6 +183,7 @@
   color: var(--accent);
   margin-top: 0.2rem;
   font-weight: 500;
+  overflow-wrap: anywhere;
 }
 
 .slotRight {
@@ -237,8 +243,56 @@
   margin-top: 0.75rem;
   font-size: 0.88rem;
   color: var(--ink-soft);
+  overflow-wrap: anywhere;
 }
 
 .messageError {
   color: var(--red);
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 1rem 0;
+  }
+
+  .addSlotCard {
+    padding: 1.25rem;
+  }
+
+  .formRow {
+    flex-direction: column;
+  }
+
+  .formField {
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .slotRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .slotRight {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .btnAddSlot,
+  .btnCancel {
+    width: 100%;
+  }
+}
+
+@media (max-width: 360px) {
+  .addSlotCard {
+    padding: 1rem;
+  }
+
+  .slotRight {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }

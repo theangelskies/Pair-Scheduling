@@ -46,53 +46,82 @@ function useCurrentUser() {
 function RootLayout() {
   const navigate = useNavigate()
   const { user, setUser } = useCurrentUser()
+  const [menuOpen, setMenuOpen] = useState(false)
+
+  function closeMenu() {
+    setMenuOpen(false)
+  }
 
   function handleSignOut() {
     localStorage.removeItem('currentUser')
     setUser(null)
+    closeMenu()
     void navigate({ to: '/login' })
   }
 
   return (
     <>
       <nav className={styles.nav}>
-        <Link to="/" activeProps={{ className: styles.navLinkActive }} className={styles.navLink}>
-          Home
-        </Link>
-        <Link
-          to="/about"
-          activeProps={{ className: styles.navLinkActive }}
-          className={styles.navLink}
+        <button
+          type="button"
+          className={styles.menuButton}
+          aria-label="Toggle navigation menu"
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((open) => !open)}
         >
-          About
-        </Link>
-        {(user?.role === 'trainee' || user?.role === 'volunteer') && (
+          <span />
+          <span />
+          <span />
+        </button>
+
+        <div className={`${styles.navLinks} ${menuOpen ? styles.navLinksOpen : ''}`}>
           <Link
-            to="/trainee"
+            to="/"
             activeProps={{ className: styles.navLinkActive }}
             className={styles.navLink}
+            onClick={closeMenu}
           >
-            Trainee
+            Home
           </Link>
-        )}
-        {user?.role === 'volunteer' && (
           <Link
-            to="/volunteer"
+            to="/about"
             activeProps={{ className: styles.navLinkActive }}
             className={styles.navLink}
+            onClick={closeMenu}
           >
-            Volunteer
+            About
           </Link>
-        )}
-        {!user && (
-          <Link
-            to="/login"
-            activeProps={{ className: styles.navLinkActive }}
-            className={styles.navLink}
-          >
-            Login
-          </Link>
-        )}
+          {(user?.role === 'trainee' || user?.role === 'volunteer') && (
+            <Link
+              to="/trainee"
+              activeProps={{ className: styles.navLinkActive }}
+              className={styles.navLink}
+              onClick={closeMenu}
+            >
+              Trainee
+            </Link>
+          )}
+          {user?.role === 'volunteer' && (
+            <Link
+              to="/volunteer"
+              activeProps={{ className: styles.navLinkActive }}
+              className={styles.navLink}
+              onClick={closeMenu}
+            >
+              Volunteer
+            </Link>
+          )}
+          {!user && (
+            <Link
+              to="/login"
+              activeProps={{ className: styles.navLinkActive }}
+              className={styles.navLink}
+              onClick={closeMenu}
+            >
+              Login
+            </Link>
+          )}
+        </div>
 
         {user && (
           <div className={styles.userBadge}>
