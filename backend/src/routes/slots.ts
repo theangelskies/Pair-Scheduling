@@ -10,7 +10,8 @@ router.get('/available', async (_req, res) => {
       `SELECT ts.*, u.name as volunteer_name
        FROM time_slots ts
        JOIN users u ON ts.volunteer_id = u.id
-       WHERE ts.status = 'available' AND ts.start_time > NOW()
+       WHERE ts.status = 'available'
+         AND ts.start_time > NOW() + (ts.minimum_notice_hours * INTERVAL '1 hour')
        ORDER BY ts.start_time ASC`,
     )
     res.json(result.rows)
@@ -35,6 +36,7 @@ router.get('/mine', async (req, res) => {
        LEFT JOIN bookings b ON b.slot_id = ts.id AND b.status = 'confirmed'
        LEFT JOIN users t ON t.id = b.trainee_id
        WHERE ts.volunteer_id = $1
+         AND (ts.status != 'available' OR ts.start_time > NOW())
        ORDER BY ts.start_time ASC`,
       [volunteerId],
     )

@@ -72,6 +72,15 @@ router.post('/', async (req, res) => {
       return res.status(409).json({ error: 'Slot is no longer available' })
     }
 
+    const noticeHours = slot.minimum_notice_hours ?? 24
+    const earliestBookable = new Date(Date.now() + noticeHours * 60 * 60 * 1000)
+    if (new Date(slot.start_time) < earliestBookable) {
+      await client.query('ROLLBACK')
+      return res.status(422).json({
+        error: `This session starts too soon to book — it requires at least ${noticeHours} hours' notice.`,
+      })
+    }
+
     const volunteerResult = await client.query('SELECT * FROM users WHERE id = $1', [
       slot.volunteer_id,
     ])
